@@ -132,16 +132,25 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
 
   <div class="row two" style="margin-top:10px">
     <div>
+      <label>Your Name (signature)</label>
+      <input id="sigName" placeholder="e.g., Abram Gearig">
+      <div class="small" style="margin-top:6px">This name is inserted into the email footer.</div>
+    </div>
+
+    <div>
       <label>To (Google Group)</label>
       <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
       <div class="small" style="margin-top:6px">Tip: put your main distro here (one address).</div>
     </div>
+  </div>
 
+  <div class="row two">
     <div>
       <label>Manual CC Extras (optional)</label>
       <input id="ccManual" placeholder="someone@domain.com, another@domain.com">
       <div class="small" style="margin-top:6px">Use this for one-offs. Groups below auto-add CCs.</div>
     </div>
+    <div></div>
   </div>
 
   <label style="margin-top:14px">CC Groups</label>
@@ -547,19 +556,12 @@ const CC_GROUPS = {
   cubic: ["ladispatch@cubic.com","Manuel.Salinas@cubic.com","Allan.Lee@cubic.com","Nestor.Gonzalez@cubic.com"]
 };
 
-function setStatus(id, msg, kind){
-  const el = $(id);
-  el.textContent = msg || "";
-  el.className = "status " + (kind || "");
-}
-
 function normalizeEmailList(s){
   return (s || "")
     .split(/[,;\n]+/)
     .map(x => x.trim())
     .filter(Boolean);
 }
-
 function uniqueEmails(list){
   const seen = new Set();
   const out = [];
@@ -572,7 +574,6 @@ function uniqueEmails(list){
   }
   return out;
 }
-
 function computeCC(){
   const selected = [];
   if($("ccg_nexien").checked) selected.push(...CC_GROUPS.nexien);
@@ -582,14 +583,34 @@ function computeCC(){
 
   const manual = normalizeEmailList($("ccManual").value);
   const finalList = uniqueEmails([...selected, ...manual]);
-
   const ccStr = finalList.join(", ");
   $("ccComputed").value = ccStr;
   return ccStr;
 }
 
+function setStatus(id, msg, kind){
+  const el = $(id);
+  el.textContent = msg || "";
+  el.className = "status " + (kind || "");
+}
+
+// footer signature
+function buildFooter(){
+  const name = ($("sigName").value || "").trim() || "Your Name";
+  return [
+    "",
+    "Thank you,",
+    name,
+    "Faregate Helpdesk",
+    "helpdesk@nexien.com",
+    "Online Service Request Form (Required) URL: http://bit.ly/474taFL",
+    "Phone: 1-866-703-9866"
+  ].join("\n");
+}
+
 function savePrefs(){
   localStorage.setItem(prefsKey, JSON.stringify({
+    sigName: $("sigName").value.trim(),
     to: $("toAddr").value.trim(),
     ccManual: $("ccManual").value.trim(),
     groups: {
@@ -604,20 +625,20 @@ function savePrefs(){
 
 function loadPrefs(){
   const p = JSON.parse(localStorage.getItem(prefsKey) || "{}");
+  $("sigName").value = p.sigName || "";
   $("toAddr").value = p.to || "";
   $("ccManual").value = p.ccManual || "";
-
   const g = p.groups || {};
   $("ccg_nexien").checked = !!g.nexien;
   $("ccg_metro").checked = !!g.metro;
   $("ccg_straffic").checked = !!g.straffic;
   $("ccg_cubic").checked = !!g.cubic;
-
   computeCC();
 }
 
 function clearPrefs(){
   localStorage.removeItem(prefsKey);
+  $("sigName").value = "";
   $("toAddr").value = "";
   $("ccManual").value = "";
   $("ccg_nexien").checked = false;
@@ -641,7 +662,6 @@ function gmailCompose(to, cc, subject, body){
   if (cc) p.set("cc", cc);
   return "https://mail.google.com/mail/?" + p.toString();
 }
-
 function gmailInbox(){
   const p = new URLSearchParams({ authuser: HELP_DESK });
   return "https://mail.google.com/mail/?" + p.toString();
@@ -659,8 +679,6 @@ function parseMDYHM(s){
   if(Number.isNaN(d.getTime())) return null;
   return d;
 }
-
-// Format duration ms -> H:MM:SS
 function formatDuration(ms){
   if(ms == null || ms < 0) return "";
   const totalSec = Math.floor(ms / 1000);
@@ -669,7 +687,6 @@ function formatDuration(ms){
   const s = totalSec % 60;
   return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
 }
-
 async function copyText(txt){
   try {
     await navigator.clipboard.writeText(txt);
@@ -677,6 +694,14 @@ async function copyText(txt){
   } catch(e){
     setStatus("actionStatus", "Copy blocked by browser. Try a different browser or use HTTPS.", "err");
   }
+}
+
+// Strip leading zeros for gate numbers like 00498 -> 498
+function normalizeGateNumber(val){
+  const t = (val || "").trim();
+  if(!t) return "";
+  if(/^\d+$/.test(t)) return String(Number(t));
+  return t;
 }
 
 /** ---------- Station/Gate filtering ---------- **/
@@ -733,27 +758,17 @@ function setGatesForStation(station){
 
   for(const g of info.gates){
     const opt = document.createElement("option");
-    opt.value = g; // show raw list (with leading zeros)
+    opt.value = g; // raw from list; will normalize on select/blur/build
     gatesDL.appendChild(opt);
   }
 }
 
-// Strip leading zeros for gate numbers like 00498 -> 498
-function normalizeGateNumber(val){
-  const t = (val || "").trim();
-  if(!t) return "";
-  if(/^\d+$/.test(t)){
-    // Number("00000") -> 0, keep "0" as "0"
-    return String(Number(t));
-  }
-  return t; // if non-numeric, leave as-is
-}
-
 /** ---------- Build outputs ---------- **/
 function build(){
+  const footer = buildFooter();
+
   const station = $("station").value.trim();
-  const fgidRawInput = $("fgid").value.trim();
-  const fgid = normalizeGateNumber(fgidRawInput); // <-- normalized here
+  const fgid = normalizeGateNumber($("fgid").value.trim());
   const ticketIdRaw = $("ticketId").value.trim();
   const issue = $("issue").value.trim();
   const actions = $("actions").value.trim();
@@ -777,7 +792,6 @@ function build(){
     setStatus("buildStatus", "Built outputs.", "ok");
   }
 
-  // DISPATCH (exact format you provided)
   const dispSub = `Service Dispatched "${station || "Station Name"}" – ${fgid || "FG ID"} – ${ticket || "Ticket ID"}`;
   const dispBody = [
     "Service Dispatched",
@@ -788,10 +802,10 @@ function build(){
     `ISSUE DETAILS: ${issue}`,
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
-    `CAUSE (IF KNOWN): ${cause}`
+    `CAUSE (IF KNOWN): ${cause}`,
+    footer
   ].join("\n");
 
-  // CLOSED (unchanged for now)
   const closeSub = `Ticket Closed – ${station || "Station"} – ${fgid || "FG"} – ${ticket || "Ticket"}`;
   const closeBody = [
     "The following ticket has been resolved:",
@@ -802,10 +816,10 @@ function build(){
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
     `CAUSE: ${cause}`,
-    `TECHNICIAN: ${tech}`
+    `TECHNICIAN: ${tech}`,
+    footer
   ].join("\n");
 
-  // DAILY REPORT LINE (TAB-separated)
   const type = "Corrective";
   const dailyCols = [
     station,
@@ -820,10 +834,8 @@ function build(){
     type,
     actions
   ];
-
   const trailingBlanks = 12;
   for(let i=0;i<trailingBlanks;i++) dailyCols.push("");
-
   const dailyLine = dailyCols.join("\t");
 
   $("dispatchPreview").textContent = `Subject: ${dispSub}\n\n${dispBody}`;
@@ -837,7 +849,6 @@ function build(){
     if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
     window.open(gmailCompose(to, cc, dispSub, dispBody), "_blank");
   };
-
   $("openClosed").onclick = () => {
     if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
     window.open(gmailCompose(to, cc, closeSub, closeBody), "_blank");
@@ -854,11 +865,9 @@ function build(){
   $(id).addEventListener("input", computeCC);
 });
 
-// Gate filtering: update gates whenever station changes
 $("station").addEventListener("input", () => setGatesForStation($("station").value.trim()));
 $("station").addEventListener("change", () => setGatesForStation($("station").value.trim()));
 
-// Normalize gate number on change/input (so selecting 00498 becomes 498)
 $("fgid").addEventListener("change", () => { $("fgid").value = normalizeGateNumber($("fgid").value); });
 $("fgid").addEventListener("blur",   () => { $("fgid").value = normalizeGateNumber($("fgid").value); });
 
