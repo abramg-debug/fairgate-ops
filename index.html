@@ -16,7 +16,7 @@ body{
   font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
   background:var(--bg); color:var(--text);
 }
-.wrap{max-width:960px;margin:28px auto;padding:16px}
+.wrap{max-width:980px;margin:28px auto;padding:16px}
 .card{
   background:var(--card);
   border:1px solid var(--border);
@@ -77,6 +77,32 @@ button.warn{background:rgba(243,18,96,.18)}
   line-height:1.35;
 }
 code{font-family:ui-monospace,Menlo,Consolas,monospace}
+.small{font-size:12px;color:var(--muted)}
+.checkgrid{
+  display:grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap:10px;
+}
+@media(min-width:900px){
+  .checkgrid{grid-template-columns: repeat(4, minmax(0,1fr));}
+}
+.check{
+  display:flex; gap:8px; align-items:flex-start;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:10px 10px;
+  background:rgba(255,255,255,.02);
+}
+.check input{width:auto; margin-top:2px}
+.badge{
+  display:inline-block;
+  font-size:11px;
+  padding:2px 8px;
+  border-radius:999px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--muted);
+}
 </style>
 </head>
 
@@ -97,12 +123,53 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
     <div>
       <label>To (Google Group)</label>
       <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
+      <div class="small" style="margin-top:6px">Tip: put your main distro here (one address).</div>
     </div>
+
     <div>
-      <label>CC (optional)</label>
-      <input id="ccAddr">
+      <label>Manual CC Extras (optional)</label>
+      <input id="ccManual" placeholder="someone@domain.com, another@domain.com">
+      <div class="small" style="margin-top:6px">Use this for one-offs. Groups below auto-add CCs.</div>
     </div>
   </div>
+
+  <label style="margin-top:14px">CC Groups</label>
+  <div class="checkgrid">
+    <label class="check">
+      <input type="checkbox" id="ccg_nexien">
+      <div>
+        <div><b>Nexien</b> <span class="badge" id="count_nexien"></span></div>
+        <div class="small">Internal team</div>
+      </div>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" id="ccg_metro">
+      <div>
+        <div><b>Metro</b> <span class="badge" id="count_metro"></span></div>
+        <div class="small">Metro stakeholders</div>
+      </div>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" id="ccg_straffic">
+      <div>
+        <div><b>STraffic</b> <span class="badge" id="count_straffic"></span></div>
+        <div class="small">STraffic contacts</div>
+      </div>
+    </label>
+
+    <label class="check">
+      <input type="checkbox" id="ccg_cubic">
+      <div>
+        <div><b>Cubic</b> <span class="badge" id="count_cubic"></span></div>
+        <div class="small">Cubic dispatch/support</div>
+      </div>
+    </label>
+  </div>
+
+  <label style="margin-top:14px">Computed CC (preview)</label>
+  <input id="ccComputed" readonly>
 
   <div class="btns">
     <button class="primary" id="openHelpdesk">Open Helpdesk Inbox</button>
@@ -192,7 +259,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
   <div class="row three">
     <div>
       <label>Reported Date/Time</label>
-      <input id="dtReported" placeholder="MM/DD/YYYY HH:MM (24hr)   e.g., 12/18/2025 17:46">
+      <input id="dtReported" placeholder="MM/DD/YYYY HH:MM   e.g., 12/18/2025 17:46">
     </div>
     <div>
       <label>Dispatch Date/Time</label>
@@ -268,9 +335,59 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
 <script>
 const $ = id => document.getElementById(id);
 const prefsKey = "fairgate_prefs_v1";
-
-// OPTION 2: Always open compose under helpdesk account
 const HELP_DESK = "helpdesk@nexien.com";
+
+// CC groups
+const CC_GROUPS = {
+  nexien: [
+    "wilson.h@nexien.com",
+    "revic.c@nexien.com",
+    "john.h@nexien.com",
+    "abram.g@nexien.com",
+    "gunsuk.y@nexien.com",
+    "charles.l@nexien.com",
+    "jimmy.z@nexien.com",
+    "bok.l@nexien.com",
+    "jose.j@nexien.com",
+    "juan.h@nexien.com",
+    "roger.d@nexien.com",
+    "pablo.a@nexien.com",
+    "devon.j@nexien.com",
+    "asanti.h@nexien.com",
+    "rafael.t@nexien.com",
+    "francisco.l@nexien.com",
+    "joshua.a@nexien.com",
+    "aijaz.s@nexien.com",
+    "julio.m@nexien.com",
+    "hector.m@nexien.com",
+    "julio.n@nexien.com",
+    "demetrius.h@nexien.com"
+  ],
+  metro: [
+    "JacksonKA@metro.net",
+    "villanuevar@metro.net",
+    "AlmedaL@metro.net",
+    "NangleC@metro.net"
+  ],
+  straffic: [
+    "kihyun38@straffic.co.kr",
+    "jelee127@straffic.co.kr",
+    "twinsi@straffic.co.kr",
+    "jwyoo@straffic.co.kr",
+    "shsong@straffic.co.kr",
+    "yssong@straffic.co.kr",
+    "yosep.choi@straffic.com",
+    "jeonsoyoung0612@straffic.co.kr",
+    "jaeiklee@straffic.co.kr",
+    "juyoung.lee@straffic.co.kr"
+  ],
+  cubic: [
+    "ladispatch@cubic.com",
+    "Manuel.Salinas@cubic.com",
+    "Allan.Lee@cubic.com",
+    "Nestor.Gonzalez@cubic.com"
+  ]
+};
 
 function setStatus(id, msg, kind){
   const el = $(id);
@@ -278,10 +395,52 @@ function setStatus(id, msg, kind){
   el.className = "status " + (kind || "");
 }
 
+function normalizeEmailList(s){
+  // Split on commas/semicolons/newlines and normalize.
+  return (s || "")
+    .split(/[,;\n]+/)
+    .map(x => x.trim())
+    .filter(Boolean);
+}
+
+function uniqueEmails(list){
+  const seen = new Set();
+  const out = [];
+  for(const e of list){
+    const key = e.toLowerCase();
+    if(!seen.has(key)){
+      seen.add(key);
+      out.push(e);
+    }
+  }
+  return out;
+}
+
+function computeCC(){
+  const selected = [];
+  if($("ccg_nexien").checked) selected.push(...CC_GROUPS.nexien);
+  if($("ccg_metro").checked) selected.push(...CC_GROUPS.metro);
+  if($("ccg_straffic").checked) selected.push(...CC_GROUPS.straffic);
+  if($("ccg_cubic").checked) selected.push(...CC_GROUPS.cubic);
+
+  const manual = normalizeEmailList($("ccManual").value);
+  const finalList = uniqueEmails([...selected, ...manual]);
+
+  const ccStr = finalList.join(", ");
+  $("ccComputed").value = ccStr;
+  return ccStr;
+}
+
 function savePrefs(){
   localStorage.setItem(prefsKey, JSON.stringify({
     to: $("toAddr").value.trim(),
-    cc: $("ccAddr").value.trim()
+    ccManual: $("ccManual").value.trim(),
+    groups: {
+      nexien: $("ccg_nexien").checked,
+      metro: $("ccg_metro").checked,
+      straffic: $("ccg_straffic").checked,
+      cubic: $("ccg_cubic").checked
+    }
   }));
   setStatus("prefStatus", "Saved.", "ok");
 }
@@ -289,13 +448,26 @@ function savePrefs(){
 function loadPrefs(){
   const p = JSON.parse(localStorage.getItem(prefsKey) || "{}");
   $("toAddr").value = p.to || "";
-  $("ccAddr").value = p.cc || "";
+  $("ccManual").value = p.ccManual || "";
+
+  const g = p.groups || {};
+  $("ccg_nexien").checked = !!g.nexien;
+  $("ccg_metro").checked = !!g.metro;
+  $("ccg_straffic").checked = !!g.straffic;
+  $("ccg_cubic").checked = !!g.cubic;
+
+  computeCC();
 }
 
 function clearPrefs(){
   localStorage.removeItem(prefsKey);
   $("toAddr").value = "";
-  $("ccAddr").value = "";
+  $("ccManual").value = "";
+  $("ccg_nexien").checked = false;
+  $("ccg_metro").checked = false;
+  $("ccg_straffic").checked = false;
+  $("ccg_cubic").checked = false;
+  computeCC();
   setStatus("prefStatus", "Cleared.", "ok");
 }
 
@@ -313,7 +485,6 @@ function gmailCompose(to, cc, subject, body){
   return "https://mail.google.com/mail/?" + p.toString();
 }
 
-// Open helpdesk inbox (handy to confirm you're in the right account)
 function gmailInbox(){
   const p = new URLSearchParams({ authuser: HELP_DESK });
   return "https://mail.google.com/mail/?" + p.toString();
@@ -332,7 +503,7 @@ function parseMDYHM(s){
   return d;
 }
 
-// Format duration ms -> H:MM:SS (e.g., 0:03:00)
+// Format duration ms -> H:MM:SS
 function formatDuration(ms){
   if(ms == null || ms < 0) return "";
   const totalSec = Math.floor(ms / 1000);
@@ -391,7 +562,7 @@ function build(){
     `CAUSE (IF KNOWN): ${cause}`
   ].join("\n");
 
-  // CLOSED (we can adjust format later if you want)
+  // CLOSED (unchanged for now)
   const closeSub = `Ticket Closed – ${station || "Station"} – ${fgidRaw || "FG"} – ${ticket || "Ticket"}`;
   const closeBody = [
     "The following ticket has been resolved:",
@@ -406,10 +577,7 @@ function build(){
   ].join("\n");
 
   // DAILY REPORT LINE (TAB-separated)
-  // Matches your example pattern:
-  // Station | Reported | Dispatch | Arrival | Duration | Gate# | Issue Summary | Status | Tech | Type | Long Notes | ...blanks...
   const type = "Corrective";
-
   const dailyCols = [
     station,
     dtReportedTxt,
@@ -424,8 +592,7 @@ function build(){
     actions
   ];
 
-  // Add extra blank columns to help align with wider sheets
-  // (adjust count anytime; more blanks is usually harmless)
+  // trailing blanks to align with wider sheet
   const trailingBlanks = 12;
   for(let i=0;i<trailingBlanks;i++) dailyCols.push("");
 
@@ -436,7 +603,7 @@ function build(){
   $("dailyPreview").textContent = dailyLine;
 
   const to = $("toAddr").value.trim();
-  const cc = $("ccAddr").value.trim();
+  const cc = computeCC();
 
   $("openDispatch").onclick = () => {
     if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
@@ -448,10 +615,22 @@ function build(){
     window.open(gmailCompose(to, cc, closeSub, closeBody), "_blank");
   };
 
-  $("copyDaily").onclick = () => copyText(dailyLine);
   $("copyDispatch").onclick = () => copyText($("dispatchPreview").textContent || "");
   $("copyClosed").onclick = () => copyText($("closedPreview").textContent || "");
+  $("copyDaily").onclick = () => copyText(dailyLine);
 }
+
+// wire up CC group changes
+["ccg_nexien","ccg_metro","ccg_straffic","ccg_cubic","ccManual"].forEach(id=>{
+  $(id).addEventListener("change", computeCC);
+  $(id).addEventListener("input", computeCC);
+});
+
+// show counts
+$("count_nexien").textContent = `${CC_GROUPS.nexien.length} emails`;
+$("count_metro").textContent = `${CC_GROUPS.metro.length} emails`;
+$("count_straffic").textContent = `${CC_GROUPS.straffic.length} emails`;
+$("count_cubic").textContent = `${CC_GROUPS.cubic.length} emails`;
 
 $("savePrefs").onclick = savePrefs;
 $("loadPrefs").onclick = () => { loadPrefs(); setStatus("prefStatus", "Reloaded.", "ok"); };
@@ -473,6 +652,7 @@ $("clearFields").onclick = () => {
 };
 
 loadPrefs();
+computeCC();
 </script>
 </body>
 </html>
