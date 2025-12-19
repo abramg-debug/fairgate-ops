@@ -167,7 +167,7 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
       <input type="checkbox" id="ccg_metro">
       <div>
         <div><b>Metro</b> <span class="badge" id="count_metro"></span></div>
-        <div class="small">Metro stakeholders</div>
+        <div class="small">Metro</div>
       </div>
     </label>
 
@@ -260,15 +260,15 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
 
   <div class="row three">
     <div>
-      <label>Reported Date/Time</label>
+      <label>Incident Date/Time:</label>
       <input id="dtReported" placeholder="MM/DD/YYYY HH:MM   e.g., 12/18/2025 17:46">
     </div>
     <div>
-      <label>Dispatch Date/Time</label>
+      <label>Ticket Received (Date/Time):</label>
       <input id="dtDispatch" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:06">
     </div>
     <div>
-      <label>Arrival Date/Time</label>
+      <label>Repair Date/Time:</label>
       <input id="dtArrival" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:09">
     </div>
   </div>
@@ -326,6 +326,10 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
   <div id="dailyPreview" class="preview"></div>
   <div class="btns">
     <button class="good" id="copyDaily">Copy Daily Line (tabs)</button>
+  </div>
+
+  <div class="btns">
+    <button class="good" id="copyRecipients">Copy All Recipients (To + CC)</button>
   </div>
 
   <div id="actionStatus" class="status"></div>
@@ -407,17 +411,17 @@ B,104,Westlake/MacArthur Park,00907
 B,104,Westlake/MacArthur Park,00908
 B,104,Westlake/MacArthur Park,00909
 B,104,Westlake/MacArthur Park,00910
-B,120,North Hollywood - Red,00154
-B,120,North Hollywood - Red,00155
-B,120,North Hollywood - Red,00156
-B,120,North Hollywood - Red,00157
-B,120,North Hollywood - Red,00158
-B,120,North Hollywood - Red,00161
-B,120,North Hollywood - Red,00162
-B,120,North Hollywood - Red,00163
-B,120,North Hollywood - Red,00164
-B,120,North Hollywood - Red,00165
-B,120,North Hollywood - Red,00166
+B,120,North Hollywood,00154
+B,120,North Hollywood,00155
+B,120,North Hollywood,00156
+B,120,North Hollywood,00157
+B,120,North Hollywood,00158
+B,120,North Hollywood,00161
+B,120,North Hollywood,00162
+B,120,North Hollywood,00163
+B,120,North Hollywood,00164
+B,120,North Hollywood,00165
+B,120,North Hollywood,00166
 B,123,Pershing Square,00035
 B,123,Pershing Square,00036
 B,123,Pershing Square,00037
@@ -704,6 +708,14 @@ function normalizeGateNumber(val){
   return t;
 }
 
+/** Copy all recipients for mobile pasting (To + computed CC) */
+function buildAllRecipientsString(){
+  const to = ($("toAddr").value || "").trim();
+  const cc = computeCC();
+  const list = uniqueEmails([...normalizeEmailList(to), ...normalizeEmailList(cc)]);
+  return list.join(", ");
+}
+
 /** ---------- Station/Gate filtering ---------- **/
 let stationIndex = new Map(); // stationName -> { line, siteId, gates: [..] }
 
@@ -778,13 +790,13 @@ function build(){
 
   const ticket = ticketIdRaw ? `FM-${ticketIdRaw}` : "";
 
-  const dtReportedTxt = $("dtReported").value.trim();
-  const dtDispatchTxt = $("dtDispatch").value.trim();
-  const dtArrivalTxt  = $("dtArrival").value.trim();
+  const dtIncidentTxt = $("dtReported").value.trim();   // Incident Date/Time
+  const dtReceivedTxt = $("dtDispatch").value.trim();   // Ticket Received
+  const dtRepairTxt   = $("dtArrival").value.trim();    // Repair Date/Time
 
-  const dtDispatch = parseMDYHM(dtDispatchTxt);
-  const dtArrival  = parseMDYHM(dtArrivalTxt);
-  const duration = (dtDispatch && dtArrival) ? formatDuration(dtArrival.getTime() - dtDispatch.getTime()) : "";
+  const dtReceived = parseMDYHM(dtReceivedTxt);
+  const dtRepair   = parseMDYHM(dtRepairTxt);
+  const duration = (dtReceived && dtRepair) ? formatDuration(dtRepair.getTime() - dtReceived.getTime()) : "";
 
   if(!station || !fgid || !ticket || !issue){
     setStatus("buildStatus", "Fill Station Name, Gate #, Ticket ID (FM-), and Issue Details.", "err");
@@ -808,8 +820,9 @@ function build(){
 
   const closeSub = `Ticket Closed – ${station || "Station"} – ${fgid || "FG"} – ${ticket || "Ticket"}`;
   const closeBody = [
-    "The following ticket has been resolved:",
+    "Ticket Closed",
     "",
+    `TICKET ID: ${ticket}`,
     `STATION NAME: ${station}`,
     `FAREGATE ID: ${fgid}`,
     `ISSUE DETAILS: ${issue}`,
@@ -823,9 +836,9 @@ function build(){
   const type = "Corrective";
   const dailyCols = [
     station,
-    dtReportedTxt,
-    dtDispatchTxt,
-    dtArrivalTxt,
+    dtIncidentTxt,
+    dtReceivedTxt,
+    dtRepairTxt,
     duration,
     fgid,
     issue,
@@ -870,6 +883,15 @@ $("station").addEventListener("change", () => setGatesForStation($("station").va
 
 $("fgid").addEventListener("change", () => { $("fgid").value = normalizeGateNumber($("fgid").value); });
 $("fgid").addEventListener("blur",   () => { $("fgid").value = normalizeGateNumber($("fgid").value); });
+
+$("copyRecipients").onclick = () => {
+  const all = buildAllRecipientsString();
+  if(!all){
+    setStatus("actionStatus", "No recipients to copy yet (set To and/or CC groups).", "err");
+    return;
+  }
+  copyText(all);
+};
 
 // counts
 $("count_nexien").textContent = `${CC_GROUPS.nexien.length} emails`;
