@@ -27,7 +27,7 @@ body{
 }
 h1{margin:0 0 8px;font-size:20px}
 h2{margin:0 0 8px;font-size:16px}
-.sub{color:var(--muted);font-size:13px}
+.sub{color:var(--muted);font-size:13px; margin:0 0 10px}
 label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
 input,textarea,select{
   width:100%;
@@ -67,6 +67,16 @@ button.warn{background:rgba(243,18,96,.18)}
 .status{margin-top:8px;font-size:13px}
 .ok{color:var(--ok)}
 .err{color:var(--err)}
+.notice{
+  border:1px solid rgba(59,130,246,.35);
+  background:rgba(59,130,246,.12);
+  border-radius:12px;
+  padding:10px 12px;
+  color:var(--text);
+  font-size:12px;
+  line-height:1.35;
+}
+code{font-family:ui-monospace,Menlo,Consolas,monospace}
 </style>
 </head>
 
@@ -75,213 +85,319 @@ button.warn{background:rgba(243,18,96,.18)}
 
 <!-- Preferences -->
 <div class="card">
-<h1>FairGate Ops Composer (V1)</h1>
-<p class="sub">Dispatch & Closure email generator (Gmail Web)</p>
+  <h1>FairGate Ops Composer (V1)</h1>
+  <p class="sub">Dispatch & Closure email generator (Gmail Web → always uses helpdesk)</p>
 
-<div class="row three">
-  <div>
-    <label>To (Google Group)</label>
-    <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
+  <div class="notice">
+    This web app opens Gmail compose using <code>helpdesk@nexien.com</code> via <code>authuser</code>.
+    <br><b>Requirement:</b> <code>helpdesk@nexien.com</code> must already be logged into this browser profile.
   </div>
-  <div>
-    <label>CC (optional)</label>
-    <input id="ccAddr">
-  </div>
-</div>
 
-<div class="btns">
-  <button class="primary" id="savePrefs">Save</button>
-  <button id="loadPrefs">Reload</button>
-  <button class="warn" id="clearPrefs">Clear</button>
-</div>
-<div id="prefStatus" class="status"></div>
+  <div class="row two" style="margin-top:10px">
+    <div>
+      <label>To (Google Group)</label>
+      <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
+    </div>
+    <div>
+      <label>CC (optional)</label>
+      <input id="ccAddr">
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="primary" id="openHelpdesk">Open Helpdesk Inbox</button>
+    <button class="primary" id="savePrefs">Save</button>
+    <button id="loadPrefs">Reload</button>
+    <button class="warn" id="clearPrefs">Clear</button>
+  </div>
+  <div id="prefStatus" class="status"></div>
 </div>
 
 <!-- Ticket Fields -->
 <div class="card">
-<h2>Ticket Fields</h2>
+  <h2>Ticket Fields</h2>
 
-<div class="row two">
-  <div>
-    <label>Station Name</label>
-    <input id="station" list="stations" placeholder="Start typing…">
-    <datalist id="stations">
-      <option value="Firestone">
-      <option value="Willowbrook - Rosa Parks">
-      <option value="Lake">
-      <option value="Allen">
-      <option value="Glendora">
-      <option value="San Dimas">
-      <option value="La Verne">
-      <option value="Pomona">
-      <option value="Westlake/MacArthur Partk">
-      <option value="North Hollywood - Red">
-      <option value="Pershing Square">
-      <option value="7th Street/Metro Center">
-      <option value="Wilshire/Vermont">
-      <option value="Vermont/Santa Monica">
-      <option value="Hollywood/Western">
-      <option value="Civic Center">
-      <option value="LAX/MTC">
-      <option value="Dougls">
-      <option value="Aviation/Imperial">
-      <option value="Norwalk">
-      <option value="Wilshire/La Brea">
-      <option value="Wilshire/Fairfax">
-      <option value="Wilshire/La Cienega">
-    </datalist>
-  </div>
+  <div class="row two">
+    <div>
+      <label>Station Name</label>
+      <input id="station" list="stations" placeholder="Start typing…">
+      <datalist id="stations">
+        <option value="Firestone">
+        <option value="Willowbrook - Rosa Parks">
+        <option value="Lake">
+        <option value="Allen">
+        <option value="Glendora">
+        <option value="San Dimas">
+        <option value="La Verne">
+        <option value="Pomona">
+        <option value="Westlake/MacArthur Partk">
+        <option value="North Hollywood - Red">
+        <option value="Pershing Square">
+        <option value="7th Street/Metro Center">
+        <option value="Wilshire/Vermont">
+        <option value="Vermont/Santa Monica">
+        <option value="Hollywood/Western">
+        <option value="Civic Center">
+        <option value="LAX/MTC">
+        <option value="Dougls">
+        <option value="Aviation/Imperial">
+        <option value="Norwalk">
+        <option value="Wilshire/La Brea">
+        <option value="Wilshire/Fairfax">
+        <option value="Wilshire/La Cienega">
+      </datalist>
+    </div>
 
-  <div>
-    <label>Faregate ID</label>
-    <input id="fgid">
-  </div>
-</div>
-
-<div class="row two">
-  <div>
-    <label>Ticket ID</label>
-    <div style="display:flex;gap:6px">
-      <span style="padding:10px 12px;border:1px solid var(--border);border-radius:12px;font-weight:600">FM-</span>
-      <input id="ticketId" placeholder="12345">
+    <div>
+      <label>Faregate ID (Gate #)</label>
+      <input id="fgid" placeholder="e.g., 498 / 00451">
     </div>
   </div>
 
-  <div>
-    <label>Technician</label>
-    <select id="tech">
-      <option value="">Select technician…</option>
-      <option>Abram Gearig</option>
-      <option>Aijaz Sabir</option>
-      <option>Asanti Hudson</option>
-      <option>Charles Lee</option>
-      <option>Demetrius Harper</option>
-      <option>Devon Johnson</option>
-      <option>Francisco Leal</option>
-      <option>Gunsuk Yang</option>
-      <option>Hector Moreno</option>
-      <option>Jimmy Zone</option>
-      <option>Jose Juarez</option>
-      <option>Joshua Almeda</option>
-      <option>Julio Martinez</option>
-      <option>Juan Hernandez</option>
-      <option>Pablo Almeda Rodriguez</option>
-      <option>Revic Cho</option>
-      <option>Roger Diaz</option>
-    </select>
+  <div class="row two">
+    <div>
+      <label>Ticket ID</label>
+      <div style="display:flex;gap:6px;align-items:center">
+        <span style="padding:10px 12px;border:1px solid var(--border);border-radius:12px;font-weight:700;letter-spacing:.4px">FM-</span>
+        <input id="ticketId" placeholder="12345">
+      </div>
+    </div>
+
+    <div>
+      <label>Technician</label>
+      <select id="tech">
+        <option value="">Select technician…</option>
+        <option>Abram Gearig</option>
+        <option>Aijaz Sabir</option>
+        <option>Asanti Hudson</option>
+        <option>Charles Lee</option>
+        <option>Demetrius Harper</option>
+        <option>Devon Johnson</option>
+        <option>Francisco Leal</option>
+        <option>Gunsuk Yang</option>
+        <option>Hector Moreno</option>
+        <option>Jimmy Zone</option>
+        <option>Jose Juarez</option>
+        <option>Joshua Almeda</option>
+        <option>Julio Martinez</option>
+        <option>Juan Hernandez</option>
+        <option>Pablo Almeda Rodriguez</option>
+        <option>Revic Cho</option>
+        <option>Roger Diaz</option>
+      </select>
+    </div>
   </div>
-</div>
 
-<label>Issue Details</label>
-<textarea id="issue"></textarea>
-
-<label>Actions Taken</label>
-<textarea id="actions"></textarea>
-
-<div class="row two">
-  <div>
-    <label>Faregate Status</label>
-    <select id="statusSel">
-      <option value="">Select…</option>
-      <option>In Service</option>
-      <option>Out of Service</option>
-      <option>Degraded</option>
-      <option>Monitoring</option>
-      <option>Pending Parts</option>
-    </select>
+  <!-- Daily report timestamps -->
+  <div class="row three">
+    <div>
+      <label>Reported Date/Time</label>
+      <input id="dtReported" placeholder="MM/DD/YYYY HH:MM (24hr)   e.g., 12/18/2025 17:46">
+    </div>
+    <div>
+      <label>Dispatch Date/Time</label>
+      <input id="dtDispatch" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:06">
+    </div>
+    <div>
+      <label>Arrival Date/Time</label>
+      <input id="dtArrival" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:09">
+    </div>
   </div>
-  <div>
-    <label>Cause (if known)</label>
-    <input id="cause">
-  </div>
-</div>
 
-<div class="btns">
-  <button class="primary" id="build">Build Emails</button>
-  <button id="clearFields">Clear</button>
-</div>
-<div id="buildStatus" class="status"></div>
+  <label>Issue Details</label>
+  <textarea id="issue" placeholder="Describe the issue…"></textarea>
+
+  <label>Actions Taken</label>
+  <textarea id="actions" placeholder="What was done…"></textarea>
+
+  <div class="row two">
+    <div>
+      <label>Faregate Status</label>
+      <select id="statusSel">
+        <option value="">Select…</option>
+        <option>Closed</option>
+        <option>In Service</option>
+        <option>Out of Service</option>
+        <option>Degraded</option>
+        <option>Monitoring</option>
+        <option>Pending Parts</option>
+      </select>
+    </div>
+    <div>
+      <label>Cause (if known)</label>
+      <input id="cause" placeholder="Optional">
+    </div>
+  </div>
+
+  <div class="btns">
+    <button class="primary" id="build">Build Emails + Daily Line</button>
+    <button id="clearFields">Clear Ticket Fields</button>
+  </div>
+  <div id="buildStatus" class="status"></div>
 </div>
 
 <!-- Outputs -->
 <div class="card">
-<h2>Outputs</h2>
+  <h2>Outputs</h2>
 
-<label>Dispatch Email</label>
-<div id="dispatchPreview" class="preview"></div>
-<div class="btns">
-  <button class="good" id="copyDispatch">Copy</button>
-  <button class="primary" id="openDispatch">Open Gmail</button>
-</div>
+  <label>Dispatch Email</label>
+  <div id="dispatchPreview" class="preview"></div>
+  <div class="btns">
+    <button class="good" id="copyDispatch">Copy</button>
+    <button class="primary" id="openDispatch">Open Gmail (helpdesk)</button>
+  </div>
 
-<label>Ticket Closed Email</label>
-<div id="closedPreview" class="preview"></div>
-<div class="btns">
-  <button class="good" id="copyClosed">Copy</button>
-  <button class="primary" id="openClosed">Open Gmail</button>
-</div>
+  <label>Ticket Closed Email</label>
+  <div id="closedPreview" class="preview"></div>
+  <div class="btns">
+    <button class="good" id="copyClosed">Copy</button>
+    <button class="primary" id="openClosed">Open Gmail (helpdesk)</button>
+  </div>
 
-<div id="actionStatus" class="status"></div>
+  <label>Daily Report Line (optional helper)</label>
+  <div id="dailyPreview" class="preview"></div>
+  <div class="btns">
+    <button class="good" id="copyDaily">Copy Daily Line (tabs)</button>
+  </div>
+
+  <div id="actionStatus" class="status"></div>
 </div>
 
 </div>
 
 <script>
-const $=id=>document.getElementById(id);
-const prefsKey="fairgate_prefs";
+const $ = id => document.getElementById(id);
+const prefsKey = "fairgate_prefs_v1";
+
+// OPTION 2: Always open compose under helpdesk account
+const HELP_DESK = "helpdesk@nexien.com";
+
+function setStatus(id, msg, kind){
+  const el = $(id);
+  el.textContent = msg || "";
+  el.className = "status " + (kind || "");
+}
 
 function savePrefs(){
-  localStorage.setItem(prefsKey,JSON.stringify({
-    to:$("toAddr").value,
-    cc:$("ccAddr").value
+  localStorage.setItem(prefsKey, JSON.stringify({
+    to: $("toAddr").value.trim(),
+    cc: $("ccAddr").value.trim()
   }));
-  $("prefStatus").textContent="Saved";
-}
-function loadPrefs(){
-  const p=JSON.parse(localStorage.getItem(prefsKey)||"{}");
-  $("toAddr").value=p.to||"";
-  $("ccAddr").value=p.cc||"";
-}
-function clearPrefs(){
-  localStorage.removeItem(prefsKey);
-  $("toAddr").value="";$("ccAddr").value="";
+  setStatus("prefStatus", "Saved.", "ok");
 }
 
-function gmail(to,cc,subject,body){
-  const p=new URLSearchParams({view:"cm",fs:"1",to,su:subject,body});
-  if(cc)p.set("cc",cc);
-  return "https://mail.google.com/mail/?"+p.toString();
+function loadPrefs(){
+  const p = JSON.parse(localStorage.getItem(prefsKey) || "{}");
+  $("toAddr").value = p.to || "";
+  $("ccAddr").value = p.cc || "";
+}
+
+function clearPrefs(){
+  localStorage.removeItem(prefsKey);
+  $("toAddr").value = "";
+  $("ccAddr").value = "";
+  setStatus("prefStatus", "Cleared.", "ok");
+}
+
+// Gmail compose URL (forces authuser to helpdesk)
+function gmailCompose(to, cc, subject, body){
+  const p = new URLSearchParams({
+    view: "cm",
+    fs: "1",
+    to: to || "",
+    su: subject || "",
+    body: body || "",
+    authuser: HELP_DESK
+  });
+  if (cc) p.set("cc", cc);
+  return "https://mail.google.com/mail/?" + p.toString();
+}
+
+// Open helpdesk inbox (handy to confirm you're in the right account)
+function gmailInbox(){
+  const p = new URLSearchParams({ authuser: HELP_DESK });
+  return "https://mail.google.com/mail/?" + p.toString();
+}
+
+// Parse "MM/DD/YYYY HH:MM" (24hr). Returns Date or null.
+function parseMDYHM(s){
+  const t = (s || "").trim();
+  if(!t) return null;
+  const m = t.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})\s+(\d{1,2}):(\d{2})$/);
+  if(!m) return null;
+  const mm = Number(m[1]), dd = Number(m[2]), yyyy = Number(m[3]);
+  const HH = Number(m[4]), MI = Number(m[5]);
+  const d = new Date(yyyy, mm-1, dd, HH, MI, 0, 0);
+  if(Number.isNaN(d.getTime())) return null;
+  return d;
+}
+
+// Format duration ms -> H:MM:SS (e.g., 0:03:00)
+function formatDuration(ms){
+  if(ms == null || ms < 0) return "";
+  const totalSec = Math.floor(ms / 1000);
+  const h = Math.floor(totalSec / 3600);
+  const m = Math.floor((totalSec % 3600) / 60);
+  const s = totalSec % 60;
+  return `${h}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`;
+}
+
+async function copyText(txt){
+  try {
+    await navigator.clipboard.writeText(txt);
+    setStatus("actionStatus", "Copied.", "ok");
+  } catch(e){
+    setStatus("actionStatus", "Copy blocked by browser. Try a different browser or use HTTPS.", "err");
+  }
 }
 
 function build(){
-  const station=$("station").value.trim();
-  const fgid=$("fgid").value.trim();
-  const ticket=$("ticketId").value.trim()?`FM-${$("ticketId").value.trim()}`:"";
-  const issue=$("issue").value.trim();
-  const actions=$("actions").value.trim();
-  const status=$("statusSel").value;
-  const cause=$("cause").value.trim();
-  const tech=$("tech").value;
+  const station = $("station").value.trim();
+  const fgidRaw = $("fgid").value.trim();
+  const ticketIdRaw = $("ticketId").value.trim();
+  const issue = $("issue").value.trim();
+  const actions = $("actions").value.trim();
+  const status = $("statusSel").value;
+  const cause = $("cause").value.trim();
+  const tech = $("tech").value;
 
-  const dispSub=`Service Dispatched "${station}" – ${fgid} – ${ticket}`;
-  const dispBody=[
+  const ticket = ticketIdRaw ? `FM-${ticketIdRaw}` : "";
+
+  const dtReportedTxt = $("dtReported").value.trim();
+  const dtDispatchTxt = $("dtDispatch").value.trim();
+  const dtArrivalTxt  = $("dtArrival").value.trim();
+
+  const dtDispatch = parseMDYHM(dtDispatchTxt);
+  const dtArrival  = parseMDYHM(dtArrivalTxt);
+  const duration = (dtDispatch && dtArrival) ? formatDuration(dtArrival.getTime() - dtDispatch.getTime()) : "";
+
+  if(!station || !fgidRaw || !ticket || !issue){
+    setStatus("buildStatus", "Fill Station Name, Faregate ID, Ticket ID (FM-), and Issue Details.", "err");
+  } else {
+    setStatus("buildStatus", "Built outputs.", "ok");
+  }
+
+  // DISPATCH (exact format you provided)
+  const dispSub = `Service Dispatched "${station || "Station Name"}" – ${fgidRaw || "FG ID"} – ${ticket || "Ticket ID"}`;
+  const dispBody = [
     "Service Dispatched",
     "",
     `TICKET ID: ${ticket}`,
     `STATION NAME: ${station}`,
-    `FAREGATE ID: ${fgid}`,
+    `FAREGATE ID: ${fgidRaw}`,
     `ISSUE DETAILS: ${issue}`,
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
     `CAUSE (IF KNOWN): ${cause}`
   ].join("\n");
 
-  const closeSub=`Ticket Closed – ${station} – ${fgid} – ${ticket}`;
-  const closeBody=[
+  // CLOSED (we can adjust format later if you want)
+  const closeSub = `Ticket Closed – ${station || "Station"} – ${fgidRaw || "FG"} – ${ticket || "Ticket"}`;
+  const closeBody = [
     "The following ticket has been resolved:",
     "",
     `STATION NAME: ${station}`,
-    `FAREGATE ID: ${fgid}`,
+    `FAREGATE ID: ${fgidRaw}`,
     `ISSUE DETAILS: ${issue}`,
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
@@ -289,20 +405,72 @@ function build(){
     `TECHNICIAN: ${tech}`
   ].join("\n");
 
-  $("dispatchPreview").textContent=`Subject: ${dispSub}\n\n${dispBody}`;
-  $("closedPreview").textContent=`Subject: ${closeSub}\n\n${closeBody}`;
+  // DAILY REPORT LINE (TAB-separated)
+  // Matches your example pattern:
+  // Station | Reported | Dispatch | Arrival | Duration | Gate# | Issue Summary | Status | Tech | Type | Long Notes | ...blanks...
+  const type = "Corrective";
 
-  $("openDispatch").onclick=()=>window.open(gmail($("toAddr").value,$("ccAddr").value,dispSub,dispBody));
-  $("openClosed").onclick=()=>window.open(gmail($("toAddr").value,$("ccAddr").value,closeSub,closeBody));
+  const dailyCols = [
+    station,
+    dtReportedTxt,
+    dtDispatchTxt,
+    dtArrivalTxt,
+    duration,
+    fgidRaw,
+    issue,
+    status,
+    tech,
+    type,
+    actions
+  ];
+
+  // Add extra blank columns to help align with wider sheets
+  // (adjust count anytime; more blanks is usually harmless)
+  const trailingBlanks = 12;
+  for(let i=0;i<trailingBlanks;i++) dailyCols.push("");
+
+  const dailyLine = dailyCols.join("\t");
+
+  $("dispatchPreview").textContent = `Subject: ${dispSub}\n\n${dispBody}`;
+  $("closedPreview").textContent = `Subject: ${closeSub}\n\n${closeBody}`;
+  $("dailyPreview").textContent = dailyLine;
+
+  const to = $("toAddr").value.trim();
+  const cc = $("ccAddr").value.trim();
+
+  $("openDispatch").onclick = () => {
+    if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
+    window.open(gmailCompose(to, cc, dispSub, dispBody), "_blank");
+  };
+
+  $("openClosed").onclick = () => {
+    if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
+    window.open(gmailCompose(to, cc, closeSub, closeBody), "_blank");
+  };
+
+  $("copyDaily").onclick = () => copyText(dailyLine);
+  $("copyDispatch").onclick = () => copyText($("dispatchPreview").textContent || "");
+  $("copyClosed").onclick = () => copyText($("closedPreview").textContent || "");
 }
 
-$("savePrefs").onclick=savePrefs;
-$("loadPrefs").onclick=loadPrefs;
-$("clearPrefs").onclick=clearPrefs;
-$("build").onclick=build;
-$("clearFields").onclick=()=>location.reload();
-$("copyDispatch").onclick=()=>navigator.clipboard.writeText($("dispatchPreview").textContent);
-$("copyClosed").onclick=()=>navigator.clipboard.writeText($("closedPreview").textContent);
+$("savePrefs").onclick = savePrefs;
+$("loadPrefs").onclick = () => { loadPrefs(); setStatus("prefStatus", "Reloaded.", "ok"); };
+$("clearPrefs").onclick = clearPrefs;
+
+$("openHelpdesk").onclick = () => window.open(gmailInbox(), "_blank");
+
+$("build").onclick = build;
+
+$("clearFields").onclick = () => {
+  ["station","fgid","ticketId","dtReported","dtDispatch","dtArrival","issue","actions","cause"].forEach(id => $(id).value = "");
+  $("tech").value = "";
+  $("statusSel").value = "";
+  $("dispatchPreview").textContent = "";
+  $("closedPreview").textContent = "";
+  $("dailyPreview").textContent = "";
+  setStatus("buildStatus", "Cleared ticket fields.", "ok");
+  setStatus("actionStatus", "", "");
+};
 
 loadPrefs();
 </script>
