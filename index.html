@@ -114,6 +114,21 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
   background:rgba(255,255,255,.03);
   color:var(--muted);
 }
+
+/* "Now" button next to date/time fields */
+.fieldRow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+}
+.fieldRow input{flex:1}
+button.nowBtn{
+  padding:10px 12px;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  font-weight:700;
+}
 </style>
 </head>
 
@@ -138,9 +153,12 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
     </div>
 
     <div>
-      <label>To (Google Group)</label>
-      <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
-      <div class="small" style="margin-top:6px">Tip: put your main distro here (one address).</div>
+      <label>To Primary Recipient</label>
+      <input id="toAddr" list="toEmails" placeholder="Start typing an email…">
+      <datalist id="toEmails"></datalist>
+      <div class="small" style="margin-top:6px">
+        Optional. You can leave this blank and send to CC-only.
+      </div>
     </div>
   </div>
 
@@ -240,18 +258,20 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
         <option>Abram Gearig</option>
         <option>Aijaz Sabir</option>
         <option>Asanti Hudson</option>
+        <option>Byoungok Lim</option>
         <option>Charles Lee</option>
         <option>Demetrius Harper</option>
         <option>Devon Johnson</option>
         <option>Francisco Leal</option>
         <option>Gunsuk Yang</option>
-        <option>Hector Moreno</option>
-        <option>Jimmy Zone</option>
         <option>Jose Juarez</option>
         <option>Joshua Almeda</option>
-        <option>Julio Martinez</option>
         <option>Juan Hernandez</option>
+        <option>Julio Martinez</option>
+        <option>Julio Novelo</option>
+        <option>Junghee Mun</option>
         <option>Pablo Almeda Rodriguez</option>
+        <option>Rafael Terrazas</option>
         <option>Revic Cho</option>
         <option>Roger Diaz</option>
       </select>
@@ -261,15 +281,24 @@ code{font-family:ui-monospace,Menlo,Consolas,monospace}
   <div class="row three">
     <div>
       <label>Incident Date/Time:</label>
-      <input id="dtReported" placeholder="MM/DD/YYYY HH:MM   e.g., 12/18/2025 17:46">
+      <div class="fieldRow">
+        <input id="dtReported" placeholder="MM/DD/YYYY HH:MM   e.g., 12/18/2025 17:46">
+        <button type="button" class="nowBtn" id="nowIncident">Now</button>
+      </div>
     </div>
     <div>
       <label>Ticket Received (Date/Time):</label>
-      <input id="dtDispatch" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:06">
+      <div class="fieldRow">
+        <input id="dtDispatch" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:06">
+        <button type="button" class="nowBtn" id="nowReceived">Now</button>
+      </div>
     </div>
     <div>
       <label>Repair Date/Time:</label>
-      <input id="dtArrival" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:09">
+      <div class="fieldRow">
+        <input id="dtArrival" placeholder="MM/DD/YYYY HH:MM   e.g., 12/19/2025 08:09">
+        <button type="button" class="nowBtn" id="nowRepair">Now</button>
+      </div>
     </div>
   </div>
 
@@ -578,6 +607,25 @@ function uniqueEmails(list){
   }
   return out;
 }
+
+/** Populate To-primary datalist with ALL known emails (from CC groups) */
+function populateToEmailDatalist(){
+  const dl = $("toEmails");
+  dl.innerHTML = "";
+  const all = uniqueEmails([
+    ...CC_GROUPS.nexien,
+    ...CC_GROUPS.metro,
+    ...CC_GROUPS.straffic,
+    ...CC_GROUPS.cubic
+  ]).sort((a,b)=>a.localeCompare(b));
+
+  for(const email of all){
+    const opt = document.createElement("option");
+    opt.value = email;
+    dl.appendChild(opt);
+  }
+}
+
 function computeCC(){
   const selected = [];
   if($("ccg_nexien").checked) selected.push(...CC_GROUPS.nexien);
@@ -598,7 +646,6 @@ function setStatus(id, msg, kind){
   el.className = "status " + (kind || "");
 }
 
-// footer signature
 function buildFooter(){
   const name = ($("sigName").value || "").trim() || "Your Name";
   return [
@@ -653,16 +700,16 @@ function clearPrefs(){
   setStatus("prefStatus", "Cleared.", "ok");
 }
 
-// Gmail compose URL (forces authuser to helpdesk)
 function gmailCompose(to, cc, subject, body){
   const p = new URLSearchParams({
     view: "cm",
     fs: "1",
-    to: to || "",
     su: subject || "",
     body: body || "",
     authuser: HELP_DESK
   });
+  // To is optional now
+  if (to) p.set("to", to);
   if (cc) p.set("cc", cc);
   return "https://mail.google.com/mail/?" + p.toString();
 }
@@ -671,7 +718,6 @@ function gmailInbox(){
   return "https://mail.google.com/mail/?" + p.toString();
 }
 
-// Parse "MM/DD/YYYY HH:MM" (24hr). Returns Date or null.
 function parseMDYHM(s){
   const t = (s || "").trim();
   if(!t) return null;
@@ -700,7 +746,6 @@ async function copyText(txt){
   }
 }
 
-// Strip leading zeros for gate numbers like 00498 -> 498
 function normalizeGateNumber(val){
   const t = (val || "").trim();
   if(!t) return "";
@@ -708,7 +753,16 @@ function normalizeGateNumber(val){
   return t;
 }
 
-/** Copy all recipients for mobile pasting (To + computed CC) */
+function nowStamp(){
+  const d = new Date();
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const yyyy = d.getFullYear();
+  const HH = String(d.getHours()).padStart(2,"0");
+  const MI = String(d.getMinutes()).padStart(2,"0");
+  return `${mm}/${dd}/${yyyy} ${HH}:${MI}`;
+}
+
 function buildAllRecipientsString(){
   const to = ($("toAddr").value || "").trim();
   const cc = computeCC();
@@ -717,7 +771,7 @@ function buildAllRecipientsString(){
 }
 
 /** ---------- Station/Gate filtering ---------- **/
-let stationIndex = new Map(); // stationName -> { line, siteId, gates: [..] }
+let stationIndex = new Map();
 
 function parseSites(){
   const lines = SITE_DATA_CSV.split("\n")
@@ -770,7 +824,7 @@ function setGatesForStation(station){
 
   for(const g of info.gates){
     const opt = document.createElement("option");
-    opt.value = g; // raw from list; will normalize on select/blur/build
+    opt.value = g;
     gatesDL.appendChild(opt);
   }
 }
@@ -790,9 +844,9 @@ function build(){
 
   const ticket = ticketIdRaw ? `FM-${ticketIdRaw}` : "";
 
-  const dtIncidentTxt = $("dtReported").value.trim();   // Incident Date/Time
-  const dtReceivedTxt = $("dtDispatch").value.trim();   // Ticket Received
-  const dtRepairTxt   = $("dtArrival").value.trim();    // Repair Date/Time
+  const dtIncidentTxt = $("dtReported").value.trim();
+  const dtReceivedTxt = $("dtDispatch").value.trim();
+  const dtRepairTxt   = $("dtArrival").value.trim();
 
   const dtReceived = parseMDYHM(dtReceivedTxt);
   const dtRepair   = parseMDYHM(dtRepairTxt);
@@ -855,15 +909,21 @@ function build(){
   $("closedPreview").textContent = `Subject: ${closeSub}\n\n${closeBody}`;
   $("dailyPreview").textContent = dailyLine;
 
-  const to = $("toAddr").value.trim();
+  const to = ($("toAddr").value || "").trim();
   const cc = computeCC();
 
   $("openDispatch").onclick = () => {
-    if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
+    if(!to && !cc){
+      setStatus("actionStatus", "Add at least one recipient (Primary or CC).", "err");
+      return;
+    }
     window.open(gmailCompose(to, cc, dispSub, dispBody), "_blank");
   };
   $("openClosed").onclick = () => {
-    if(!to){ setStatus("actionStatus", "Set the To (Google Group) first.", "err"); return; }
+    if(!to && !cc){
+      setStatus("actionStatus", "Add at least one recipient (Primary or CC).", "err");
+      return;
+    }
     window.open(gmailCompose(to, cc, closeSub, closeBody), "_blank");
   };
 
@@ -887,11 +947,15 @@ $("fgid").addEventListener("blur",   () => { $("fgid").value = normalizeGateNumb
 $("copyRecipients").onclick = () => {
   const all = buildAllRecipientsString();
   if(!all){
-    setStatus("actionStatus", "No recipients to copy yet (set To and/or CC groups).", "err");
+    setStatus("actionStatus", "No recipients to copy yet (set Primary and/or CC).", "err");
     return;
   }
   copyText(all);
 };
+
+$("nowIncident").onclick = () => { $("dtReported").value = nowStamp(); };
+$("nowReceived").onclick = () => { $("dtDispatch").value = nowStamp(); };
+$("nowRepair").onclick = () => { $("dtArrival").value = nowStamp(); };
 
 // counts
 $("count_nexien").textContent = `${CC_GROUPS.nexien.length} emails`;
@@ -924,6 +988,7 @@ $("clearFields").onclick = () => {
 /** ---------- Init ---------- **/
 parseSites();
 populateStationDatalist();
+populateToEmailDatalist();
 loadPrefs();
 computeCC();
 setGatesForStation($("station").value.trim());
