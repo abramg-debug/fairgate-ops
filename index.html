@@ -1,429 +1,310 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>FairGate Ops Composer (V1)</title>
-  <style>
-    :root{
-      --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb0d8;
-      --accent:#3b82f6; --ok:#17c964; --err:#f31260; --border:rgba(255,255,255,.08);
-    }
-    *{box-sizing:border-box}
-    body{
-      margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
-      background:var(--bg); color:var(--text);
-    }
-    .wrap{max-width:900px;margin:28px auto;padding:16px}
-    .grid{display:grid; gap:14px}
-    @media(min-width:860px){ .grid{grid-template-columns: 1.2fr .8fr;} }
-    .card{
-      background:var(--card); border:1px solid var(--border);
-      border-radius:16px; box-shadow:0 10px 28px rgba(0,0,0,.35);
-      padding:16px;
-    }
-    h1{margin:0 0 10px;font-size:20px}
-    .sub{color:var(--muted); font-size:13px; margin:0 0 14px}
-    label{display:block; font-size:12px; color:var(--muted); margin:10px 0 6px}
-    input, textarea, select{
-      width:100%; border-radius:12px; border:1px solid var(--border);
-      background:rgba(255,255,255,.03); color:var(--text);
-      padding:10px 12px; outline:none;
-    }
-    textarea{min-height:92px; resize:vertical}
-    .row{display:grid; gap:12px}
-    @media(min-width:520px){ .row.two{grid-template-columns:1fr 1fr;} .row.three{grid-template-columns:1fr 1fr 1fr;} }
-    .btns{display:flex; flex-wrap:wrap; gap:10px; margin-top:12px}
-    button{
-      border:1px solid var(--border); background:rgba(255,255,255,.04); color:var(--text);
-      padding:10px 12px; border-radius:12px; cursor:pointer; font-weight:600;
-    }
-    button.primary{background:rgba(59,130,246,.18); border-color:rgba(59,130,246,.45)}
-    button.good{background:rgba(23,201,100,.14); border-color:rgba(23,201,100,.45)}
-    button.warn{background:rgba(243,18,96,.12); border-color:rgba(243,18,96,.45)}
-    button:active{transform:translateY(1px)}
-    .preview{
-      white-space:pre-wrap; font-family:ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono","Courier New", monospace;
-      font-size:12px; background:rgba(0,0,0,.25); border:1px solid var(--border);
-      border-radius:12px; padding:12px; min-height:120px;
-    }
-    .tiny{font-size:12px;color:var(--muted)}
-    .pill{
-      display:inline-flex; gap:8px; align-items:center;
-      padding:6px 10px; border-radius:999px; border:1px solid var(--border);
-      background:rgba(255,255,255,.03);
-      font-size:12px; color:var(--muted);
-    }
-    .status{margin-top:10px; min-height:18px}
-    .status.ok{color:var(--ok)}
-    .status.err{color:var(--err)}
-  </style>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FairGate Ops Composer (V1)</title>
+
+<style>
+:root{
+  --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb0d8;
+  --accent:#3b82f6; --ok:#17c964; --err:#f31260; --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+}
+.wrap{max-width:960px;margin:28px auto;padding:16px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:16px;
+  margin-bottom:14px;
+}
+h1{margin:0 0 8px;font-size:20px}
+h2{margin:0 0 8px;font-size:16px}
+.sub{color:var(--muted);font-size:13px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+input,textarea,select{
+  width:100%;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  padding:10px 12px;
+}
+textarea{min-height:90px;resize:vertical}
+.row{display:grid;gap:12px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+button{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+button.primary{background:rgba(59,130,246,.18)}
+button.good{background:rgba(23,201,100,.18)}
+button.warn{background:rgba(243,18,96,.18)}
+.preview{
+  white-space:pre-wrap;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  min-height:120px;
+}
+.status{margin-top:8px;font-size:13px}
+.ok{color:var(--ok)}
+.err{color:var(--err)}
+</style>
 </head>
+
 <body>
-  <div class="wrap">
-    <div class="card" style="margin-bottom:14px">
-      <h1>FairGate Ops Composer (V1)</h1>
-      <p class="sub">
-        Fill fields once → generate Dispatch & Ticket Closed emails with consistent formatting.
-        Use a Google Group address to avoid pasting 30 recipients.
-      </p>
-      <div class="row three">
-        <div>
-          <label>To (Google Group / distro)</label>
-          <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com" />
-          <div class="tiny" style="margin-top:6px">Saved locally in your browser.</div>
-        </div>
-        <div>
-          <label>CC (optional)</label>
-          <input id="ccAddr" placeholder="optional@domain.com" />
-        </div>
-        <div>
-          <label>Default Technician (optional)</label>
-          <input id="techDefault" placeholder="Tech name" />
-        </div>
-      </div>
-      <div class="btns">
-        <button class="primary" id="savePrefs">Save</button>
-        <button id="loadPrefs">Reload Saved</button>
-        <button class="warn" id="clearPrefs">Clear Saved</button>
-        <span class="pill" title="Tip: Use a Google Group here so you never paste 30 emails again.">Tip: Use Google Group</span>
-      </div>
-      <div id="prefStatus" class="status"></div>
-    </div>
+<div class="wrap">
 
-    <div class="grid">
-      <div class="card">
-        <h2 style="margin:0 0 8px; font-size:16px">Ticket Fields</h2>
-        <div class="row two">
-          <div>
-            <label>Station Name</label>
-            <input id="station" placeholder="e.g., Willowbrook - Center" />
-          </div>
-          <div>
-            <label>Faregate ID</label>
-            <input id="fgid" placeholder="e.g., 451" />
-          </div>
-        </div>
+<!-- Preferences -->
+<div class="card">
+<h1>FairGate Ops Composer (V1)</h1>
+<p class="sub">Dispatch & Closure email generator (Gmail Web)</p>
 
-        <div class="row two">
-          <div>
-            <label>Ticket / Incident ID (optional)</label>
-            <input id="ticketId" placeholder="e.g., SS-12345" />
-          </div>
-          <div>
-            <label>Technician (optional)</label>
-            <input id="tech" placeholder="e.g., Abram Gearig" />
-          </div>
-        </div>
+<div class="row three">
+  <div>
+    <label>To (Google Group)</label>
+    <input id="toAddr" placeholder="fairgate-dispatch@yourdomain.com">
+  </div>
+  <div>
+    <label>CC (optional)</label>
+    <input id="ccAddr">
+  </div>
+</div>
 
-        <label>Issue Details</label>
-        <textarea id="issue" placeholder="What happened / symptoms / alarms / customer complaint..."></textarea>
+<div class="btns">
+  <button class="primary" id="savePrefs">Save</button>
+  <button id="loadPrefs">Reload</button>
+  <button class="warn" id="clearPrefs">Clear</button>
+</div>
+<div id="prefStatus" class="status"></div>
+</div>
 
-        <label>Actions Taken</label>
-        <textarea id="actions" placeholder="What was done / parts replaced / resets / tests performed..."></textarea>
+<!-- Ticket Fields -->
+<div class="card">
+<h2>Ticket Fields</h2>
 
-        <div class="row two">
-          <div>
-            <label>Faregate Status</label>
-            <select id="statusSel">
-              <option value="">Select...</option>
-              <option>In Service</option>
-              <option>Out of Service</option>
-              <option>Degraded</option>
-              <option>Monitoring</option>
-              <option>Pending Parts</option>
-            </select>
-          </div>
-          <div>
-            <label>Cause of Out of Service (optional)</label>
-            <input id="cause" placeholder="e.g., AI camera non-responsive / Motor fault" />
-          </div>
-        </div>
+<div class="row two">
+  <div>
+    <label>Station Name</label>
+    <input id="station" list="stations" placeholder="Start typing…">
+    <datalist id="stations">
+      <option value="Firestone">
+      <option value="Willowbrook - Rosa Parks">
+      <option value="Lake">
+      <option value="Allen">
+      <option value="Glendora">
+      <option value="San Dimas">
+      <option value="La Verne">
+      <option value="Pomona">
+      <option value="Westlake/MacArthur Partk">
+      <option value="North Hollywood - Red">
+      <option value="Pershing Square">
+      <option value="7th Street/Metro Center">
+      <option value="Wilshire/Vermont">
+      <option value="Vermont/Santa Monica">
+      <option value="Hollywood/Western">
+      <option value="Civic Center">
+      <option value="LAX/MTC">
+      <option value="Dougls">
+      <option value="Aviation/Imperial">
+      <option value="Norwalk">
+      <option value="Wilshire/La Brea">
+      <option value="Wilshire/Fairfax">
+      <option value="Wilshire/La Cienega">
+    </datalist>
+  </div>
 
-        <div class="btns">
-          <button class="primary" id="build">Build Previews</button>
-          <button id="clearFields">Clear Ticket Fields</button>
-        </div>
+  <div>
+    <label>Faregate ID</label>
+    <input id="fgid">
+  </div>
+</div>
 
-        <div id="buildStatus" class="status"></div>
-      </div>
-
-      <div class="card">
-        <h2 style="margin:0 0 8px; font-size:16px">Outputs</h2>
-
-        <label>Dispatch Email Preview</label>
-        <div id="dispatchPreview" class="preview"></div>
-        <div class="btns">
-          <button class="good" id="copyDispatch">Copy Dispatch</button>
-          <button class="primary" id="openDispatch">Open Dispatch in Email</button>
-        </div>
-
-        <label style="margin-top:14px">Ticket Closed Email Preview</label>
-        <div id="closedPreview" class="preview"></div>
-        <div class="btns">
-          <button class="good" id="copyClosed">Copy Closed</button>
-          <button class="primary" id="openClosed">Open Closed in Email</button>
-        </div>
-
-        <label style="margin-top:14px">Daily Report Line (optional helper)</label>
-        <div id="dailyPreview" class="preview"></div>
-        <div class="btns">
-          <button class="good" id="copyDaily">Copy Daily Line</button>
-        </div>
-
-        <div id="actionStatus" class="status"></div>
-
-        <p class="tiny" style="margin-top:12px; line-height:1.35">
-          Notes:
-          <br>• “Open in Email” uses <code>mailto:</code> (default email app). If you want it to always open Gmail web compose, tell me and I’ll swap it.
-          <br>• Keep recipients as a Google Group to avoid manual address pasting.
-        </p>
-      </div>
+<div class="row two">
+  <div>
+    <label>Ticket ID</label>
+    <div style="display:flex;gap:6px">
+      <span style="padding:10px 12px;border:1px solid var(--border);border-radius:12px;font-weight:600">FM-</span>
+      <input id="ticketId" placeholder="12345">
     </div>
   </div>
 
+  <div>
+    <label>Technician</label>
+    <select id="tech">
+      <option value="">Select technician…</option>
+      <option>Abram Gearig</option>
+      <option>Aijaz Sabir</option>
+      <option>Asanti Hudson</option>
+      <option>Charles Lee</option>
+      <option>Demetrius Harper</option>
+      <option>Devon Johnson</option>
+      <option>Francisco Leal</option>
+      <option>Gunsuk Yang</option>
+      <option>Hector Moreno</option>
+      <option>Jimmy Zone</option>
+      <option>Jose Juarez</option>
+      <option>Joshua Almeda</option>
+      <option>Julio Martinez</option>
+      <option>Juan Hernandez</option>
+      <option>Pablo Almeda Rodriguez</option>
+      <option>Revic Cho</option>
+      <option>Roger Diaz</option>
+    </select>
+  </div>
+</div>
+
+<label>Issue Details</label>
+<textarea id="issue"></textarea>
+
+<label>Actions Taken</label>
+<textarea id="actions"></textarea>
+
+<div class="row two">
+  <div>
+    <label>Faregate Status</label>
+    <select id="statusSel">
+      <option value="">Select…</option>
+      <option>In Service</option>
+      <option>Out of Service</option>
+      <option>Degraded</option>
+      <option>Monitoring</option>
+      <option>Pending Parts</option>
+    </select>
+  </div>
+  <div>
+    <label>Cause (if known)</label>
+    <input id="cause">
+  </div>
+</div>
+
+<div class="btns">
+  <button class="primary" id="build">Build Emails</button>
+  <button id="clearFields">Clear</button>
+</div>
+<div id="buildStatus" class="status"></div>
+</div>
+
+<!-- Outputs -->
+<div class="card">
+<h2>Outputs</h2>
+
+<label>Dispatch Email</label>
+<div id="dispatchPreview" class="preview"></div>
+<div class="btns">
+  <button class="good" id="copyDispatch">Copy</button>
+  <button class="primary" id="openDispatch">Open Gmail</button>
+</div>
+
+<label>Ticket Closed Email</label>
+<div id="closedPreview" class="preview"></div>
+<div class="btns">
+  <button class="good" id="copyClosed">Copy</button>
+  <button class="primary" id="openClosed">Open Gmail</button>
+</div>
+
+<div id="actionStatus" class="status"></div>
+</div>
+
+</div>
+
 <script>
-  const $ = (id) => document.getElementById(id);
+const $=id=>document.getElementById(id);
+const prefsKey="fairgate_prefs";
 
-  const state = {
-    dispatch: { subject: "", body: "" },
-    closed: { subject: "", body: "" },
-    daily: ""
-  };
+function savePrefs(){
+  localStorage.setItem(prefsKey,JSON.stringify({
+    to:$("toAddr").value,
+    cc:$("ccAddr").value
+  }));
+  $("prefStatus").textContent="Saved";
+}
+function loadPrefs(){
+  const p=JSON.parse(localStorage.getItem(prefsKey)||"{}");
+  $("toAddr").value=p.to||"";
+  $("ccAddr").value=p.cc||"";
+}
+function clearPrefs(){
+  localStorage.removeItem(prefsKey);
+  $("toAddr").value="";$("ccAddr").value="";
+}
 
-  function setStatus(el, msg, kind="ok"){
-    el.textContent = msg || "";
-    el.className = "status " + (kind === "err" ? "err" : "ok");
-    if(!msg) el.className = "status";
-  }
+function gmail(to,cc,subject,body){
+  const p=new URLSearchParams({view:"cm",fs:"1",to,su:subject,body});
+  if(cc)p.set("cc",cc);
+  return "https://mail.google.com/mail/?"+p.toString();
+}
 
-  function safe(v){ return (v || "").toString().trim(); }
+function build(){
+  const station=$("station").value.trim();
+  const fgid=$("fgid").value.trim();
+  const ticket=$("ticketId").value.trim()?`FM-${$("ticketId").value.trim()}`:"";
+  const issue=$("issue").value.trim();
+  const actions=$("actions").value.trim();
+  const status=$("statusSel").value;
+  const cause=$("cause").value.trim();
+  const tech=$("tech").value;
 
-  function prefsKey(){ return "fairgate_ops_v1_prefs"; }
+  const dispSub=`Service Dispatched "${station}" – ${fgid} – ${ticket}`;
+  const dispBody=[
+    "Service Dispatched",
+    "",
+    `TICKET ID: ${ticket}`,
+    `STATION NAME: ${station}`,
+    `FAREGATE ID: ${fgid}`,
+    `ISSUE DETAILS: ${issue}`,
+    `ACTIONS TAKEN: ${actions}`,
+    `FAREGATE STATUS: ${status}`,
+    `CAUSE (IF KNOWN): ${cause}`
+  ].join("\n");
 
-  function loadPrefs(){
-    try{
-      const raw = localStorage.getItem(prefsKey());
-      if(!raw) return false;
-      const p = JSON.parse(raw);
-      $("toAddr").value = p.to || "";
-      $("ccAddr").value = p.cc || "";
-      $("techDefault").value = p.techDefault || "";
-      return true;
-    }catch(e){
-      return false;
-    }
-  }
+  const closeSub=`Ticket Closed – ${station} – ${fgid} – ${ticket}`;
+  const closeBody=[
+    "The following ticket has been resolved:",
+    "",
+    `STATION NAME: ${station}`,
+    `FAREGATE ID: ${fgid}`,
+    `ISSUE DETAILS: ${issue}`,
+    `ACTIONS TAKEN: ${actions}`,
+    `FAREGATE STATUS: ${status}`,
+    `CAUSE: ${cause}`,
+    `TECHNICIAN: ${tech}`
+  ].join("\n");
 
-  function savePrefs(){
-    const p = {
-      to: safe($("toAddr").value),
-      cc: safe($("ccAddr").value),
-      techDefault: safe($("techDefault").value)
-    };
-    localStorage.setItem(prefsKey(), JSON.stringify(p));
-  }
+  $("dispatchPreview").textContent=`Subject: ${dispSub}\n\n${dispBody}`;
+  $("closedPreview").textContent=`Subject: ${closeSub}\n\n${closeBody}`;
 
-  function clearPrefs(){
-    localStorage.removeItem(prefsKey());
-  }
+  $("openDispatch").onclick=()=>window.open(gmail($("toAddr").value,$("ccAddr").value,dispSub,dispBody));
+  $("openClosed").onclick=()=>window.open(gmail($("toAddr").value,$("ccAddr").value,closeSub,closeBody));
+}
 
-  function buildAll(){
-    const station = safe($("station").value);
-    const fgid = safe($("fgid").value);
-    const ticketId = safe($("ticketId").value);
-    const issue = safe($("issue").value);
-    const actions = safe($("actions").value);
-    const status = safe($("statusSel").value);
-    const cause = safe($("cause").value);
+$("savePrefs").onclick=savePrefs;
+$("loadPrefs").onclick=loadPrefs;
+$("clearPrefs").onclick=clearPrefs;
+$("build").onclick=build;
+$("clearFields").onclick=()=>location.reload();
+$("copyDispatch").onclick=()=>navigator.clipboard.writeText($("dispatchPreview").textContent);
+$("copyClosed").onclick=()=>navigator.clipboard.writeText($("closedPreview").textContent);
 
-    const tech = safe($("tech").value) || safe($("techDefault").value);
-
-    if(!station || !fgid || !issue){
-      setStatus($("buildStatus"), "Fill at least Station Name, Faregate ID, and Issue Details.", "err");
-    }else{
-      setStatus($("buildStatus"), "Previews built.", "ok");
-    }
-
-    // DISPATCH
-    const dispSubjectParts = [];
-    dispSubjectParts.push("DISPATCH");
-    dispSubjectParts.push(station ? station : "STATION");
-    dispSubjectParts.push("FG " + (fgid || "ID"));
-    if(ticketId) dispSubjectParts.push(ticketId);
-
-    const dispatchSubject = dispSubjectParts.join(" – ");
-
-    const dispatchLines = [];
-    dispatchLines.push("DISPATCH NOTICE");
-    dispatchLines.push("");
-    if(ticketId) dispatchLines.push("TICKET ID: " + ticketId);
-    dispatchLines.push("STATION NAME: " + (station || ""));
-    dispatchLines.push("FAREGATE ID: " + (fgid || ""));
-    if(tech) dispatchLines.push("ASSIGNED TECHNICIAN: " + tech);
-    dispatchLines.push("ISSUE DETAILS: " + (issue || ""));
-    if(cause) dispatchLines.push("CAUSE (IF KNOWN): " + cause);
-    dispatchLines.push("");
-    dispatchLines.push("Please advise ETA / arrival time and update actions taken when available.");
-
-    const dispatchBody = dispatchLines.join("\n");
-
-    // CLOSED
-    const closedSubjectParts = [];
-    closedSubjectParts.push("Ticket Closed");
-    closedSubjectParts.push(station ? station : "STATION");
-    closedSubjectParts.push("FG " + (fgid || "ID"));
-    if(ticketId) closedSubjectParts.push(ticketId);
-    const closedSubject = closedSubjectParts.join(" – ");
-
-    const closedLines = [];
-    closedLines.push("The following ticket has been resolved:");
-    closedLines.push("");
-    closedLines.push("STATION NAME: " + (station || ""));
-    closedLines.push("FAREGATE ID: " + (fgid || ""));
-    closedLines.push("ISSUE DETAILS: " + (issue || ""));
-    closedLines.push("ACTIONS TAKEN: " + (actions || ""));
-    closedLines.push("FAREGATE STATUS: " + (status || ""));
-    if(cause) closedLines.push("CAUSE OF OUT OF SERVICE: " + cause);
-    if(tech) closedLines.push("ASSIGNED TECHNICIAN: " + tech);
-
-    const closedBody = closedLines.join("\n");
-
-    // DAILY REPORT LINE (compact)
-    // Example: 12/19 – Willowbrook - Center – FG451 – OOS – Camera non-responsive – Replaced camera, tested OK
-    const today = new Date();
-    const mm = String(today.getMonth()+1).padStart(2,"0");
-    const dd = String(today.getDate()).padStart(2,"0");
-    const dailyParts = [];
-    dailyParts.push(`${mm}/${dd}`);
-    if(station) dailyParts.push(station);
-    if(fgid) dailyParts.push(`FG${fgid}`);
-    if(status) dailyParts.push(status);
-    if(issue) dailyParts.push(issue);
-    if(actions) dailyParts.push(actions);
-    const dailyLine = dailyParts.join(" – ");
-
-    state.dispatch = { subject: dispatchSubject, body: dispatchBody };
-    state.closed = { subject: closedSubject, body: closedBody };
-    state.daily = dailyLine;
-
-    $("dispatchPreview").textContent = `Subject: ${dispatchSubject}\n\n${dispatchBody}`;
-    $("closedPreview").textContent = `Subject: ${closedSubject}\n\n${closedBody}`;
-    $("dailyPreview").textContent = dailyLine;
-  }
-
-  async function copyText(txt){
-    try{
-      await navigator.clipboard.writeText(txt);
-      return true;
-    }catch(e){
-      // Fallback
-      const ta = document.createElement("textarea");
-      ta.value = txt;
-      document.body.appendChild(ta);
-      ta.select();
-      const ok = document.execCommand("copy");
-      document.body.removeChild(ta);
-      return ok;
-    }
-  }
-
-  function makeMailto(to, cc, subject, body){
-    // Keep encoding safe
-    const params = new URLSearchParams();
-    if(cc) params.set("cc", cc);
-    params.set("subject", subject);
-    params.set("body", body);
-    return `mailto:${encodeURIComponent(to)}?${params.toString()}`;
-  }
-
-  function requireBuilt(){
-    if(!state.dispatch.subject && !state.closed.subject){
-      buildAll();
-    }
-  }
-
-  // Pref buttons
-  $("savePrefs").addEventListener("click", () => {
-    savePrefs();
-    setStatus($("prefStatus"), "Saved.", "ok");
-  });
-  $("loadPrefs").addEventListener("click", () => {
-    const ok = loadPrefs();
-    setStatus($("prefStatus"), ok ? "Loaded saved preferences." : "No saved preferences found.", ok ? "ok" : "err");
-  });
-  $("clearPrefs").addEventListener("click", () => {
-    clearPrefs();
-    $("toAddr").value = "";
-    $("ccAddr").value = "";
-    $("techDefault").value = "";
-    setStatus($("prefStatus"), "Cleared saved preferences.", "ok");
-  });
-
-  // Build/clear ticket fields
-  $("build").addEventListener("click", () => {
-    buildAll();
-  });
-  $("clearFields").addEventListener("click", () => {
-    ["station","fgid","ticketId","tech","issue","actions","cause"].forEach(id => $(id).value = "");
-    $("statusSel").value = "";
-    $("dispatchPreview").textContent = "";
-    $("closedPreview").textContent = "";
-    $("dailyPreview").textContent = "";
-    state.dispatch = {subject:"", body:""};
-    state.closed = {subject:"", body:""};
-    state.daily = "";
-    setStatus($("buildStatus"), "Cleared ticket fields.", "ok");
-    setStatus($("actionStatus"), "", "ok");
-  });
-
-  // Copy/Open actions
-  $("copyDispatch").addEventListener("click", async () => {
-    requireBuilt();
-    const text = `Subject: ${state.dispatch.subject}\n\n${state.dispatch.body}`;
-    const ok = await copyText(text);
-    setStatus($("actionStatus"), ok ? "Dispatch copied." : "Could not copy (browser blocked).", ok ? "ok" : "err");
-  });
-
-  $("openDispatch").addEventListener("click", () => {
-    requireBuilt();
-    const to = safe($("toAddr").value);
-    if(!to){
-      setStatus($("actionStatus"), "Set the To address (Google Group) first.", "err");
-      return;
-    }
-    const cc = safe($("ccAddr").value);
-    const url = makeMailto(to, cc, state.dispatch.subject, state.dispatch.body);
-    window.location.href = url;
-  });
-
-  $("copyClosed").addEventListener("click", async () => {
-    requireBuilt();
-    const text = `Subject: ${state.closed.subject}\n\n${state.closed.body}`;
-    const ok = await copyText(text);
-    setStatus($("actionStatus"), ok ? "Closed email copied." : "Could not copy (browser blocked).", ok ? "ok" : "err");
-  });
-
-  $("openClosed").addEventListener("click", () => {
-    requireBuilt();
-    const to = safe($("toAddr").value);
-    if(!to){
-      setStatus($("actionStatus"), "Set the To address (Google Group) first.", "err");
-      return;
-    }
-    const cc = safe($("ccAddr").value);
-    const url = makeMailto(to, cc, state.closed.subject, state.closed.body);
-    window.location.href = url;
-  });
-
-  $("copyDaily").addEventListener("click", async () => {
-    requireBuilt();
-    const ok = await copyText(state.daily || "");
-    setStatus($("actionStatus"), ok ? "Daily report line copied." : "Could not copy (browser blocked).", ok ? "ok" : "err");
-  });
-
-  // Auto-load prefs on open
-  loadPrefs();
+loadPrefs();
 </script>
 </body>
 </html>
