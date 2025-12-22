@@ -129,6 +129,57 @@ button.nowBtn{
   background:rgba(255,255,255,.04);
   font-weight:700;
 }
+
+/* Expandable group styling */
+details.ccDetails{
+  border:1px solid var(--border);
+  border-radius:12px;
+  background:rgba(255,255,255,.02);
+  overflow:hidden;
+}
+details.ccDetails > summary{
+  list-style:none;
+  cursor:pointer;
+  padding:10px 10px;
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+}
+details.ccDetails > summary::-webkit-details-marker{display:none}
+.detailsBody{
+  padding:10px 10px 12px 10px;
+  border-top:1px solid var(--border);
+}
+.groupTools{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  margin-bottom:10px;
+}
+.groupTools input{flex:1}
+.emailRow{
+  display:flex;
+  gap:8px;
+  align-items:center;
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:8px 10px;
+  background:rgba(255,255,255,.02);
+}
+.emailRow .emailText{
+  flex:1;
+  font-size:12px;
+  word-break:break-all;
+}
+.emailRow button{
+  padding:8px 10px;
+  border-radius:12px;
+}
+.mini{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:8px;
+}
 </style>
 </head>
 
@@ -171,40 +222,10 @@ button.nowBtn{
     <div></div>
   </div>
 
-  <label style="margin-top:14px">CC Groups</label>
-  <div class="checkgrid">
-    <label class="check">
-      <input type="checkbox" id="ccg_nexien">
-      <div>
-        <div><b>Nexien</b> <span class="badge" id="count_nexien"></span></div>
-        <div class="small">Internal team</div>
-      </div>
-    </label>
+  <label style="margin-top:14px">CC Groups (click a group to expand)</label>
 
-    <label class="check">
-      <input type="checkbox" id="ccg_metro">
-      <div>
-        <div><b>Metro</b> <span class="badge" id="count_metro"></span></div>
-        <div class="small">Metro</div>
-      </div>
-    </label>
-
-    <label class="check">
-      <input type="checkbox" id="ccg_straffic">
-      <div>
-        <div><b>STraffic</b> <span class="badge" id="count_straffic"></span></div>
-        <div class="small">STraffic contacts</div>
-      </div>
-    </label>
-
-    <label class="check">
-      <input type="checkbox" id="ccg_cubic">
-      <div>
-        <div><b>Cubic</b> <span class="badge" id="count_cubic"></span></div>
-        <div class="small">Cubic dispatch/support</div>
-      </div>
-    </label>
-  </div>
+  <!-- NEW: expandable CC groups render here -->
+  <div id="ccGroupsUI"></div>
 
   <label style="margin-top:14px">Computed CC (preview)</label>
   <input id="ccComputed" readonly>
@@ -216,6 +237,10 @@ button.nowBtn{
     <button class="warn" id="clearPrefs">Clear</button>
   </div>
   <div id="prefStatus" class="status"></div>
+
+  <div class="mini">
+    Notes: Group edits (disable/add/remove) are saved locally in this browser (localStorage). Nothing is sent anywhere.
+  </div>
 </div>
 
 <!-- Ticket Fields -->
@@ -571,7 +596,7 @@ D,2988,Wilshire/La Cienega,00921
 D,2988,Wilshire/La Cienega,00922
 `.trim();
 
-// CC groups
+// CC groups (defaults)
 const CC_GROUPS = {
   nexien: [
     "wilson.h@nexien.com","revic.c@nexien.com","john.h@nexien.com","abram.g@nexien.com","gunsuk.y@nexien.com",
@@ -588,6 +613,16 @@ const CC_GROUPS = {
   ],
   cubic: ["ladispatch@cubic.com","Manuel.Salinas@cubic.com","Allan.Lee@cubic.com","Nestor.Gonzalez@cubic.com"]
 };
+
+const GROUP_META = [
+  { key:"nexien",  label:"Nexien",  desc:"Internal team" },
+  { key:"metro",   label:"Metro",   desc:"Metro" },
+  { key:"straffic",label:"STraffic",desc:"STraffic contacts" },
+  { key:"cubic",   label:"Cubic",   desc:"Cubic dispatch/support" }
+];
+
+// Stores add/remove/disabled per group (local only)
+const customGroupsKey = "fairgate_cc_groups_custom_v1";
 
 function normalizeEmailList(s){
   return (s || "")
@@ -607,19 +642,115 @@ function uniqueEmails(list){
   }
   return out;
 }
+function isValidEmail(e){
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test((e||"").trim());
+}
 
-/** Populate To-primary datalist with ALL known emails (from CC groups) */
+function loadCustomGroups(){
+  try { return JSON.parse(localStorage.getItem(customGroupsKey) || "{}"); }
+  catch { return {}; }
+}
+function saveCustomGroups(obj){
+  localStorage.setItem(customGroupsKey, JSON.stringify(obj));
+}
+function ensureCustomGroup(custom, groupKey){
+  custom[groupKey] ||= { added: [], removed: [], disabled: [] };
+  custom[groupKey].added ||= [];
+  custom[groupKey].removed ||= [];
+  custom[groupKey].disabled ||= [];
+}
+
+function getEffectiveGroup(groupKey){
+  const custom = loadCustomGroups();
+  ensureCustomGroup(custom, groupKey);
+
+  const base = (CC_GROUPS[groupKey] || []).slice();
+  const added = custom[groupKey].added;
+  const removed = new Set(custom[groupKey].removed.map(e=>e.toLowerCase()));
+  const disabled = new Set(custom[groupKey].disabled.map(e=>e.toLowerCase()));
+
+  let merged = uniqueEmails([...base, ...added])
+    .filter(e => !removed.has(e.toLowerCase()))
+    .sort((a,b)=>a.localeCompare(b));
+
+  return { merged, disabled };
+}
+
+function setEmailDisabled(groupKey, email, disabledBool){
+  const custom = loadCustomGroups();
+  ensureCustomGroup(custom, groupKey);
+
+  const low = email.toLowerCase();
+  const arr = custom[groupKey].disabled;
+
+  const exists = arr.some(x=>x.toLowerCase()===low);
+  if(disabledBool && !exists) arr.push(email);
+  if(!disabledBool && exists) custom[groupKey].disabled = arr.filter(x=>x.toLowerCase()!==low);
+
+  saveCustomGroups(custom);
+}
+
+function addEmailToGroup(groupKey, email){
+  const e = (email || "").trim();
+  if(!e || !isValidEmail(e)) return false;
+
+  const custom = loadCustomGroups();
+  ensureCustomGroup(custom, groupKey);
+
+  // un-remove if present
+  custom[groupKey].removed = custom[groupKey].removed.filter(x=>x.toLowerCase()!==e.toLowerCase());
+
+  // add if missing
+  if(!custom[groupKey].added.some(x=>x.toLowerCase()===e.toLowerCase())){
+    custom[groupKey].added.push(e);
+  }
+
+  // enable it by default
+  custom[groupKey].disabled = custom[groupKey].disabled.filter(x=>x.toLowerCase()!==e.toLowerCase());
+
+  saveCustomGroups(custom);
+  return true;
+}
+
+function removeEmailFromGroup(groupKey, email){
+  const e = (email || "").trim();
+  if(!e) return;
+
+  const custom = loadCustomGroups();
+  ensureCustomGroup(custom, groupKey);
+
+  // if it was added, drop it
+  custom[groupKey].added = custom[groupKey].added.filter(x=>x.toLowerCase()!==e.toLowerCase());
+
+  // mark removed so it won't appear even if in defaults
+  if(!custom[groupKey].removed.some(x=>x.toLowerCase()===e.toLowerCase())){
+    custom[groupKey].removed.push(e);
+  }
+
+  // remove from disabled list
+  custom[groupKey].disabled = custom[groupKey].disabled.filter(x=>x.toLowerCase()!==e.toLowerCase());
+
+  saveCustomGroups(custom);
+}
+
+function resetGroupCustomizations(groupKey){
+  const custom = loadCustomGroups();
+  delete custom[groupKey];
+  saveCustomGroups(custom);
+}
+
+/** Populate To-primary datalist with ALL known emails (defaults + custom adds, minus custom removes) */
 function populateToEmailDatalist(){
+  const all = [];
+  for(const g of GROUP_META){
+    const { merged } = getEffectiveGroup(g.key);
+    all.push(...merged);
+  }
+  const uniqueSorted = uniqueEmails(all).sort((a,b)=>a.localeCompare(b));
+
   const dl = $("toEmails");
   dl.innerHTML = "";
-  const all = uniqueEmails([
-    ...CC_GROUPS.nexien,
-    ...CC_GROUPS.metro,
-    ...CC_GROUPS.straffic,
-    ...CC_GROUPS.cubic
-  ]).sort((a,b)=>a.localeCompare(b));
-
-  for(const email of all){
+  for(const email of uniqueSorted){
     const opt = document.createElement("option");
     opt.value = email;
     dl.appendChild(opt);
@@ -628,16 +759,168 @@ function populateToEmailDatalist(){
 
 function computeCC(){
   const selected = [];
-  if($("ccg_nexien").checked) selected.push(...CC_GROUPS.nexien);
-  if($("ccg_metro").checked) selected.push(...CC_GROUPS.metro);
-  if($("ccg_straffic").checked) selected.push(...CC_GROUPS.straffic);
-  if($("ccg_cubic").checked) selected.push(...CC_GROUPS.cubic);
+
+  for(const g of GROUP_META){
+    const cb = $("ccg_" + g.key);
+    if(cb && cb.checked){
+      const { merged, disabled } = getEffectiveGroup(g.key);
+      for(const email of merged){
+        if(!disabled.has(email.toLowerCase())) selected.push(email);
+      }
+    }
+  }
 
   const manual = normalizeEmailList($("ccManual").value);
   const finalList = uniqueEmails([...selected, ...manual]);
   const ccStr = finalList.join(", ");
   $("ccComputed").value = ccStr;
   return ccStr;
+}
+
+function updateGroupBadges(){
+  for(const g of GROUP_META){
+    const badge = $("count_" + g.key);
+    if(!badge) continue;
+    const { merged, disabled } = getEffectiveGroup(g.key);
+    const enabledCount = merged.filter(e=>!disabled.has(e.toLowerCase())).length;
+    badge.textContent = `${enabledCount}/${merged.length} enabled`;
+  }
+}
+
+function renderCCGroupsUI(){
+  const host = $("ccGroupsUI");
+  host.innerHTML = "";
+
+  const grid = document.createElement("div");
+  grid.className = "checkgrid";
+
+  for(const g of GROUP_META){
+    const { merged, disabled } = getEffectiveGroup(g.key);
+
+    const det = document.createElement("details");
+    det.className = "ccDetails";
+
+    const sum = document.createElement("summary");
+
+    // master checkbox
+    const cb = document.createElement("input");
+    cb.type = "checkbox";
+    cb.id = "ccg_" + g.key;
+    cb.style.marginTop = "2px";
+    cb.addEventListener("click", ev => ev.stopPropagation()); // don't toggle details when clicking checkbox
+    cb.addEventListener("change", () => { computeCC(); });
+
+    // summary content
+    const sumContent = document.createElement("div");
+    sumContent.innerHTML = `
+      <div><b>${g.label}</b> <span class="badge" id="count_${g.key}"></span></div>
+      <div class="small">${g.desc}</div>
+    `;
+
+    sum.appendChild(cb);
+    sum.appendChild(sumContent);
+
+    const body = document.createElement("div");
+    body.className = "detailsBody";
+
+    // Add + Reset row
+    const tools = document.createElement("div");
+    tools.className = "groupTools";
+    tools.innerHTML = `
+      <input id="add_${g.key}" placeholder="Add email to ${g.label}…">
+      <button type="button" class="primary" id="addBtn_${g.key}">Add</button>
+      <button type="button" class="warn" id="resetBtn_${g.key}">Reset</button>
+    `;
+    body.appendChild(tools);
+
+    const listWrap = document.createElement("div");
+    listWrap.style.display = "grid";
+    listWrap.style.gap = "8px";
+
+    for(const email of merged){
+      const row = document.createElement("div");
+      row.className = "emailRow";
+
+      const ecb = document.createElement("input");
+      ecb.type = "checkbox";
+      ecb.checked = !disabled.has(email.toLowerCase());
+      ecb.title = "Include this email when the group is checked";
+
+      const txt = document.createElement("div");
+      txt.className = "emailText";
+      txt.textContent = email;
+
+      const rm = document.createElement("button");
+      rm.type = "button";
+      rm.className = "warn";
+      rm.textContent = "Remove";
+
+      ecb.addEventListener("change", ()=>{
+        setEmailDisabled(g.key, email, !ecb.checked);
+        computeCC();
+        updateGroupBadges();
+        populateToEmailDatalist();
+      });
+
+      rm.addEventListener("click", ()=>{
+        removeEmailFromGroup(g.key, email);
+        renderCCGroupsUI();
+        loadPrefs(); // re-apply saved checkbox states
+        computeCC();
+        updateGroupBadges();
+        populateToEmailDatalist();
+      });
+
+      row.appendChild(ecb);
+      row.appendChild(txt);
+      row.appendChild(rm);
+      listWrap.appendChild(row);
+    }
+
+    body.appendChild(listWrap);
+    det.appendChild(sum);
+    det.appendChild(body);
+
+    // wire add/reset after insertion
+    det.addEventListener("toggle", ()=>{}); // keeps details interactive; no-op
+
+    grid.appendChild(det);
+
+    // after added to DOM
+    setTimeout(() => {
+      const addInp = $("add_" + g.key);
+      const addBtn = $("addBtn_" + g.key);
+      const resetBtn = $("resetBtn_" + g.key);
+
+      addBtn.onclick = () => {
+        const ok = addEmailToGroup(g.key, addInp.value);
+        if(!ok){
+          setStatus("prefStatus", "Invalid email.", "err");
+          return;
+        }
+        addInp.value = "";
+        renderCCGroupsUI();
+        loadPrefs();
+        computeCC();
+        updateGroupBadges();
+        populateToEmailDatalist();
+        setStatus("prefStatus", "Added email to group.", "ok");
+      };
+
+      resetBtn.onclick = () => {
+        resetGroupCustomizations(g.key);
+        renderCCGroupsUI();
+        loadPrefs();
+        computeCC();
+        updateGroupBadges();
+        populateToEmailDatalist();
+        setStatus("prefStatus", "Group reset to defaults.", "ok");
+      };
+    }, 0);
+  }
+
+  host.appendChild(grid);
+  updateGroupBadges();
 }
 
 function setStatus(id, msg, kind){
@@ -660,16 +943,17 @@ function buildFooter(){
 }
 
 function savePrefs(){
+  const groups = {};
+  for(const g of GROUP_META){
+    const cb = $("ccg_" + g.key);
+    groups[g.key] = !!(cb && cb.checked);
+  }
+
   localStorage.setItem(prefsKey, JSON.stringify({
     sigName: $("sigName").value.trim(),
     to: $("toAddr").value.trim(),
     ccManual: $("ccManual").value.trim(),
-    groups: {
-      nexien: $("ccg_nexien").checked,
-      metro: $("ccg_metro").checked,
-      straffic: $("ccg_straffic").checked,
-      cubic: $("ccg_cubic").checked
-    }
+    groups
   }));
   setStatus("prefStatus", "Saved.", "ok");
 }
@@ -679,24 +963,31 @@ function loadPrefs(){
   $("sigName").value = p.sigName || "";
   $("toAddr").value = p.to || "";
   $("ccManual").value = p.ccManual || "";
+
   const g = p.groups || {};
-  $("ccg_nexien").checked = !!g.nexien;
-  $("ccg_metro").checked = !!g.metro;
-  $("ccg_straffic").checked = !!g.straffic;
-  $("ccg_cubic").checked = !!g.cubic;
+  for(const meta of GROUP_META){
+    const cb = $("ccg_" + meta.key);
+    if(cb) cb.checked = !!g[meta.key];
+  }
+
   computeCC();
+  updateGroupBadges();
 }
 
 function clearPrefs(){
   localStorage.removeItem(prefsKey);
+
   $("sigName").value = "";
   $("toAddr").value = "";
   $("ccManual").value = "";
-  $("ccg_nexien").checked = false;
-  $("ccg_metro").checked = false;
-  $("ccg_straffic").checked = false;
-  $("ccg_cubic").checked = false;
+
+  for(const meta of GROUP_META){
+    const cb = $("ccg_" + meta.key);
+    if(cb) cb.checked = false;
+  }
+
   computeCC();
+  updateGroupBadges();
   setStatus("prefStatus", "Cleared.", "ok");
 }
 
@@ -708,8 +999,7 @@ function gmailCompose(to, cc, subject, body){
     body: body || "",
     authuser: HELP_DESK
   });
-  // To is optional now
-  if (to) p.set("to", to);
+  if (to) p.set("to", to); // optional
   if (cc) p.set("cc", cc);
   return "https://mail.google.com/mail/?" + p.toString();
 }
@@ -749,6 +1039,7 @@ async function copyText(txt){
 function normalizeGateNumber(val){
   const t = (val || "").trim();
   if(!t) return "";
+  // Keep your existing behavior (do not force padding here)
   if(/^\d+$/.test(t)) return String(Number(t));
   return t;
 }
@@ -933,10 +1224,8 @@ function build(){
 }
 
 /** ---------- Events ---------- **/
-["ccg_nexien","ccg_metro","ccg_straffic","ccg_cubic","ccManual"].forEach(id=>{
-  $(id).addEventListener("change", computeCC);
-  $(id).addEventListener("input", computeCC);
-});
+$("ccManual").addEventListener("change", computeCC);
+$("ccManual").addEventListener("input", computeCC);
 
 $("station").addEventListener("input", () => setGatesForStation($("station").value.trim()));
 $("station").addEventListener("change", () => setGatesForStation($("station").value.trim()));
@@ -956,12 +1245,6 @@ $("copyRecipients").onclick = () => {
 $("nowIncident").onclick = () => { $("dtReported").value = nowStamp(); };
 $("nowReceived").onclick = () => { $("dtDispatch").value = nowStamp(); };
 $("nowRepair").onclick = () => { $("dtArrival").value = nowStamp(); };
-
-// counts
-$("count_nexien").textContent = `${CC_GROUPS.nexien.length} emails`;
-$("count_metro").textContent = `${CC_GROUPS.metro.length} emails`;
-$("count_straffic").textContent = `${CC_GROUPS.straffic.length} emails`;
-$("count_cubic").textContent = `${CC_GROUPS.cubic.length} emails`;
 
 $("savePrefs").onclick = savePrefs;
 $("loadPrefs").onclick = () => { loadPrefs(); setStatus("prefStatus", "Reloaded.", "ok"); };
@@ -988,9 +1271,14 @@ $("clearFields").onclick = () => {
 /** ---------- Init ---------- **/
 parseSites();
 populateStationDatalist();
-populateToEmailDatalist();
+
+// NEW: build expandable CC groups, then load prefs (so checkboxes exist)
+renderCCGroupsUI();
 loadPrefs();
+
 computeCC();
+updateGroupBadges();
+populateToEmailDatalist();
 setGatesForStation($("station").value.trim());
 </script>
 </body>
