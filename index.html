@@ -212,7 +212,7 @@ details.ccDetails > summary::-webkit-details-marker{display:none}
   <div class="row two" style="margin-top:10px">
     <div>
       <label>Your Name (signature)</label>
-      <input id="sigName" placeholder="e.g., Abram Gearig">
+      <input id="sigName" placeholder="e.g., John Doe">
       <div class="small" style="margin-top:6px">This name is inserted into the email footer.</div>
     </div>
 
@@ -782,36 +782,6 @@ function populateToEmailDatalist(){
   }
 }
 
-function computeCC(){
-  const selected = [];
-
-  for(const g of GROUP_META){
-    const cb = $("ccg_" + g.key);
-    if(cb && cb.checked){
-      const { merged, disabled } = getEffectiveGroup(g.key);
-      for(const email of merged){
-        if(!disabled.has(email.toLowerCase())) selected.push(email);
-      }
-    }
-  }
-
-  const manual = normalizeEmailList($("ccManual").value);
-  const finalList = uniqueEmails([...selected, ...manual]);
-  const ccStr = finalList.join(", ");
-  $("ccComputed").value = ccStr;
-  return ccStr;
-}
-
-function updateGroupBadges(){
-  for(const g of GROUP_META){
-    const badge = $("count_" + g.key);
-    if(!badge) continue;
-    const { merged, disabled } = getEffectiveGroup(g.key);
-    const enabledCount = merged.filter(e=>!disabled.has(e.toLowerCase())).length;
-    badge.textContent = `${enabledCount}/${merged.length} enabled`;
-  }
-}
-
 /* ---- Mutual exclusion + gray-out Nexien when HelpdeskNexien is selected ---- */
 function updateExclusiveUI(){
   const nex = $("ccg_nexien");
@@ -843,18 +813,62 @@ function enforceMutualExclusion(changedKey){
   updateExclusiveUI();
 }
 
+/**
+ * NEW BEHAVIOR:
+ * If To = helpdesknexien@nexien.com, auto-UNcheck HelpdeskNexien group
+ * (prevents To+CC duplicate and keeps "HelpdeskNexien" for CC-only use).
+ */
 function onToPrimaryChanged(){
   const to = ($("toAddr").value || "").trim().toLowerCase();
   const hdn = $("ccg_helpdesknexien");
   if(!hdn) return;
 
   if(to === HELPDEK_NEXIEN_EMAIL){
-    hdn.checked = true;
-    enforceMutualExclusion("helpdesknexien");
+    if(hdn.checked){
+      hdn.checked = false;
+      enforceMutualExclusion("helpdesknexien");
+    } else {
+      updateExclusiveUI();
+    }
     computeCC();
     savePrefs();
   } else {
     updateExclusiveUI();
+  }
+}
+
+function computeCC(){
+  const selected = [];
+
+  for(const g of GROUP_META){
+    const cb = $("ccg_" + g.key);
+    if(cb && cb.checked){
+      const { merged, disabled } = getEffectiveGroup(g.key);
+      for(const email of merged){
+        if(!disabled.has(email.toLowerCase())) selected.push(email);
+      }
+    }
+  }
+
+  const manual = normalizeEmailList($("ccManual").value);
+
+  // Never CC the primary recipient (general safety)
+  const to = ($("toAddr").value || "").trim().toLowerCase();
+  const finalList = uniqueEmails([...selected, ...manual])
+    .filter(e => e.toLowerCase() !== to);
+
+  const ccStr = finalList.join(", ");
+  $("ccComputed").value = ccStr;
+  return ccStr;
+}
+
+function updateGroupBadges(){
+  for(const g of GROUP_META){
+    const badge = $("count_" + g.key);
+    if(!badge) continue;
+    const { merged, disabled } = getEffectiveGroup(g.key);
+    const enabledCount = merged.filter(e=>!disabled.has(e.toLowerCase())).length;
+    badge.textContent = `${enabledCount}/${merged.length} enabled`;
   }
 }
 
@@ -1021,10 +1035,14 @@ function parseSmartsheetRowText(raw){
   return kv;
 }
 
+// Converts:
+// - "12/22/25" + "5:00" -> "12/22/2025 05:00"
+// - "12/22/25, 6:22 AM" -> "12/22/2025 06:22"
 function toMDYHM(dateStr, timeStr){
   const d = (dateStr || "").trim();
   const t = (timeStr || "").trim();
 
+  // Case: combined "12/22/25, 6:22 AM"
   const combined = d.includes(",") ? d : "";
   if(combined){
     const m = combined.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
@@ -1040,6 +1058,7 @@ function toMDYHM(dateStr, timeStr){
     }
   }
 
+  // Case: separate date + time
   const md = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if(!md) return "";
   const mm = String(md[1]).padStart(2,"0");
@@ -1047,6 +1066,7 @@ function toMDYHM(dateStr, timeStr){
   const yy = md[3];
   const yyyy = (yy.length === 2) ? ("20" + yy) : yy;
 
+  // time: "5:00" or "05:00" or "6:22 AM"
   let hh = "00", mi = "00";
   const t12 = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   const t24 = t.match(/^(\d{1,2}):(\d{2})$/);
@@ -1069,15 +1089,15 @@ function toMDYHM(dateStr, timeStr){
 function fillFromSmartsheetPaste(raw){
   const kv = parseSmartsheetRowText(raw);
 
-  const ticket = kv.get("ticket id");
-  const station = kv.get("station name");
-  const entrance = kv.get("station entrance");
-  const desc = kv.get("incident description");
-  const gate = kv.get("faregate no");
-  const incDate = kv.get("incident date");
-  const incTime = kv.get("incident time");
-  const created = kv.get("created date");
-  const actionLogs = kv.get("action logs");
+  const ticket = kv.get("ticket id");               // "FM-190"
+  const station = kv.get("station name");           // "Willowbrook/Rosa Parks"
+  const entrance = kv.get("station entrance");      // "South to MBL Platform"
+  const desc = kv.get("incident description");      // "Degrade mode - Sensor intermittent"
+  const gate = kv.get("faregate no");               // "450"
+  const incDate = kv.get("incident date");          // "12/22/25"
+  const incTime = kv.get("incident time");          // "5:00"
+  const created = kv.get("created date");           // "12/22/25, 6:22 AM"
+  const actionLogs = kv.get("action logs");         // may be blank
 
   if(ticket){
     const m = ticket.match(/FM-\s*(\d+)/i);
@@ -1101,7 +1121,9 @@ function fillFromSmartsheetPaste(raw){
 
   if(actionLogs) $("actions").value = actionLogs;
 
+  // Refresh station-derived displays and gates datalist
   setGatesForStation($("station").value.trim());
+  // normalize gate input after fill
   $("fgid").value = normalizeGateNumber($("fgid").value);
 
   setStatus("prefStatus", "Parsed Smartsheet row and filled fields.", "ok");
@@ -1161,6 +1183,7 @@ function loadPrefs(){
   computeCC();
   updateGroupBadges();
   updateExclusiveUI();
+  onToPrimaryChanged();
 }
 
 function clearPrefs(){
@@ -1349,7 +1372,7 @@ function build(){
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
     `CAUSE (IF KNOWN): ${cause}`,
-    buildFooter()
+    footer
   ].join("\n");
 
   const closeSub = `Ticket Closed – ${station || "Station"} – ${fgid || "FG"} – ${ticket || "Ticket"}`;
@@ -1364,7 +1387,7 @@ function build(){
     `FAREGATE STATUS: ${status}`,
     `CAUSE: ${cause}`,
     `TECHNICIAN: ${tech}`,
-    buildFooter()
+    footer
   ].join("\n");
 
   const type = "Corrective";
@@ -1413,8 +1436,8 @@ function build(){
 }
 
 /** ---------- Events ---------- **/
-$("ccManual").addEventListener("change", computeCC);
-$("ccManual").addEventListener("input", computeCC);
+$("ccManual").addEventListener("change", () => { computeCC(); savePrefs(); });
+$("ccManual").addEventListener("input", () => { computeCC(); });
 
 $("toAddr").addEventListener("input", onToPrimaryChanged);
 $("toAddr").addEventListener("change", onToPrimaryChanged);
