@@ -184,6 +184,15 @@ details.ccDetails > summary::-webkit-details-marker{display:none}
   color:var(--muted);
   margin-top:8px;
 }
+
+/* Mutually-exclusive group disabled look */
+.disabledGroup{
+  opacity: .55;
+  filter: saturate(.6);
+}
+.disabledGroup > summary{
+  cursor: not-allowed !important;
+}
 </style>
 </head>
 
@@ -408,6 +417,7 @@ details.ccDetails > summary::-webkit-details-marker{display:none}
 const $ = id => document.getElementById(id);
 const prefsKey = "fairgate_prefs_v1";
 const HELP_DESK = "helpdesk@nexien.com";
+const HELPDEK_NEXIEN_EMAIL = "helpdesknexien@nexien.com";
 
 /**
  * Embedded site dataset.
@@ -561,17 +571,17 @@ K,2941,LAX/MTC,00215
 K,2941,LAX/MTC,00216
 K,2941,LAX/MTC,00217
 K,2941,LAX/MTC,00218
-K,171,Dougls,00436
-K,171,Dougls,00437
-K,171,Dougls,00438
-K,171,Dougls,00439
-K,171,Dougls,00530
-K,171,Dougls,00531
-K,171,Dougls,00440
-K,171,Dougls,00441
-K,171,Dougls,00442
-K,171,Dougls,00475
-K,171,Dougls,00476
+K,171,Douglas,00436
+K,171,Douglas,00437
+K,171,Douglas,00438
+K,171,Douglas,00439
+K,171,Douglas,00530
+K,171,Douglas,00531
+K,171,Douglas,00440
+K,171,Douglas,00441
+K,171,Douglas,00442
+K,171,Douglas,00475
+K,171,Douglas,00476
 C,174,Aviation/Imperial,00411
 C,174,Aviation/Imperial,00412
 C,174,Aviation/Imperial,00413
@@ -618,6 +628,7 @@ const CC_GROUPS = {
     "francisco.l@nexien.com","joshua.a@nexien.com","aijaz.s@nexien.com","julio.m@nexien.com","hector.m@nexien.com",
     "julio.n@nexien.com","demetrius.h@nexien.com"
   ],
+  helpdesknexien: ["helpdesknexien@nexien.com"],
   metro: ["JacksonKA@metro.net","villanuevar@metro.net","AlmedaL@metro.net","NangleC@metro.net"],
   straffic: [
     "kihyun38@straffic.co.kr","jelee127@straffic.co.kr","twinsi@straffic.co.kr","jwyoo@straffic.co.kr",
@@ -629,6 +640,7 @@ const CC_GROUPS = {
 
 const GROUP_META = [
   { key:"nexien",  label:"Nexien",  desc:"Internal team" },
+  { key:"helpdesknexien", label:"HelpdeskNexien", desc:"Use instead of Nexien CC group (single address)" },
   { key:"metro",   label:"Metro",   desc:"Metro" },
   { key:"straffic",label:"STraffic",desc:"STraffic contacts" },
   { key:"cubic",   label:"Cubic",   desc:"Cubic dispatch/support" }
@@ -800,6 +812,52 @@ function updateGroupBadges(){
   }
 }
 
+/* ---- Mutual exclusion + gray-out Nexien when HelpdeskNexien is selected ---- */
+function updateExclusiveUI(){
+  const nex = $("ccg_nexien");
+  const hdn = $("ccg_helpdesknexien");
+  const nexDet = $("ccdet_nexien");
+
+  if(!nex || !hdn) return;
+
+  const lockNexien = !!hdn.checked;
+
+  if(lockNexien){
+    nex.checked = false;
+    nex.disabled = true;
+    if(nexDet) nexDet.classList.add("disabledGroup");
+  } else {
+    nex.disabled = false;
+    if(nexDet) nexDet.classList.remove("disabledGroup");
+  }
+}
+
+function enforceMutualExclusion(changedKey){
+  const nex = $("ccg_nexien");
+  const hdn = $("ccg_helpdesknexien");
+  if(!nex || !hdn) return;
+
+  if(changedKey === "helpdesknexien" && hdn.checked) nex.checked = false;
+  if(changedKey === "nexien" && nex.checked) hdn.checked = false;
+
+  updateExclusiveUI();
+}
+
+function onToPrimaryChanged(){
+  const to = ($("toAddr").value || "").trim().toLowerCase();
+  const hdn = $("ccg_helpdesknexien");
+  if(!hdn) return;
+
+  if(to === HELPDEK_NEXIEN_EMAIL){
+    hdn.checked = true;
+    enforceMutualExclusion("helpdesknexien");
+    computeCC();
+    savePrefs();
+  } else {
+    updateExclusiveUI();
+  }
+}
+
 function renderCCGroupsUI(){
   const host = $("ccGroupsUI");
   host.innerHTML = "";
@@ -812,6 +870,7 @@ function renderCCGroupsUI(){
 
     const det = document.createElement("details");
     det.className = "ccDetails";
+    det.id = "ccdet_" + g.key;
 
     const sum = document.createElement("summary");
 
@@ -820,7 +879,11 @@ function renderCCGroupsUI(){
     cb.id = "ccg_" + g.key;
     cb.style.marginTop = "2px";
     cb.addEventListener("click", ev => ev.stopPropagation());
-    cb.addEventListener("change", () => { computeCC(); });
+    cb.addEventListener("change", () => {
+      enforceMutualExclusion(g.key);
+      computeCC();
+      savePrefs();
+    });
 
     const sumContent = document.createElement("div");
     sumContent.innerHTML = `
@@ -927,6 +990,7 @@ function renderCCGroupsUI(){
 
   host.appendChild(grid);
   updateGroupBadges();
+  updateExclusiveUI();
 }
 
 /* ---------- Smartsheet Paste Parser (label -> value lines) ---------- */
@@ -957,14 +1021,10 @@ function parseSmartsheetRowText(raw){
   return kv;
 }
 
-// Converts:
-// - "12/22/25" + "5:00" -> "12/22/2025 05:00"
-// - "12/22/25, 6:22 AM" -> "12/22/2025 06:22"
 function toMDYHM(dateStr, timeStr){
   const d = (dateStr || "").trim();
   const t = (timeStr || "").trim();
 
-  // Case: combined "12/22/25, 6:22 AM"
   const combined = d.includes(",") ? d : "";
   if(combined){
     const m = combined.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4}),\s*(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
@@ -980,7 +1040,6 @@ function toMDYHM(dateStr, timeStr){
     }
   }
 
-  // Case: separate date + time
   const md = d.match(/^(\d{1,2})\/(\d{1,2})\/(\d{2,4})$/);
   if(!md) return "";
   const mm = String(md[1]).padStart(2,"0");
@@ -988,7 +1047,6 @@ function toMDYHM(dateStr, timeStr){
   const yy = md[3];
   const yyyy = (yy.length === 2) ? ("20" + yy) : yy;
 
-  // time: "5:00" or "05:00" or "6:22 AM"
   let hh = "00", mi = "00";
   const t12 = t.match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
   const t24 = t.match(/^(\d{1,2}):(\d{2})$/);
@@ -1011,15 +1069,15 @@ function toMDYHM(dateStr, timeStr){
 function fillFromSmartsheetPaste(raw){
   const kv = parseSmartsheetRowText(raw);
 
-  const ticket = kv.get("ticket id");               // "FM-190"
-  const station = kv.get("station name");           // "Willowbrook/Rosa Parks"
-  const entrance = kv.get("station entrance");      // "South to MBL Platform"
-  const desc = kv.get("incident description");      // "Degrade mode - Sensor intermittent"
-  const gate = kv.get("faregate no");               // "450"
-  const incDate = kv.get("incident date");          // "12/22/25"
-  const incTime = kv.get("incident time");          // "5:00"
-  const created = kv.get("created date");           // "12/22/25, 6:22 AM"
-  const actionLogs = kv.get("action logs");         // may be blank
+  const ticket = kv.get("ticket id");
+  const station = kv.get("station name");
+  const entrance = kv.get("station entrance");
+  const desc = kv.get("incident description");
+  const gate = kv.get("faregate no");
+  const incDate = kv.get("incident date");
+  const incTime = kv.get("incident time");
+  const created = kv.get("created date");
+  const actionLogs = kv.get("action logs");
 
   if(ticket){
     const m = ticket.match(/FM-\s*(\d+)/i);
@@ -1043,9 +1101,7 @@ function fillFromSmartsheetPaste(raw){
 
   if(actionLogs) $("actions").value = actionLogs;
 
-  // Refresh station-derived displays and gates datalist
   setGatesForStation($("station").value.trim());
-  // normalize gate input after fill
   $("fgid").value = normalizeGateNumber($("fgid").value);
 
   setStatus("prefStatus", "Parsed Smartsheet row and filled fields.", "ok");
@@ -1099,8 +1155,12 @@ function loadPrefs(){
     if(cb) cb.checked = !!g[meta.key];
   }
 
+  enforceMutualExclusion("nexien");
+  enforceMutualExclusion("helpdesknexien");
+
   computeCC();
   updateGroupBadges();
+  updateExclusiveUI();
 }
 
 function clearPrefs(){
@@ -1117,6 +1177,7 @@ function clearPrefs(){
 
   computeCC();
   updateGroupBadges();
+  updateExclusiveUI();
   setStatus("prefStatus", "Cleared.", "ok");
 }
 
@@ -1288,7 +1349,7 @@ function build(){
     `ACTIONS TAKEN: ${actions}`,
     `FAREGATE STATUS: ${status}`,
     `CAUSE (IF KNOWN): ${cause}`,
-    footer
+    buildFooter()
   ].join("\n");
 
   const closeSub = `Ticket Closed – ${station || "Station"} – ${fgid || "FG"} – ${ticket || "Ticket"}`;
@@ -1303,7 +1364,7 @@ function build(){
     `FAREGATE STATUS: ${status}`,
     `CAUSE: ${cause}`,
     `TECHNICIAN: ${tech}`,
-    footer
+    buildFooter()
   ].join("\n");
 
   const type = "Corrective";
@@ -1354,6 +1415,9 @@ function build(){
 /** ---------- Events ---------- **/
 $("ccManual").addEventListener("change", computeCC);
 $("ccManual").addEventListener("input", computeCC);
+
+$("toAddr").addEventListener("input", onToPrimaryChanged);
+$("toAddr").addEventListener("change", onToPrimaryChanged);
 
 $("station").addEventListener("input", () => setGatesForStation($("station").value.trim()));
 $("station").addEventListener("change", () => setGatesForStation($("station").value.trim()));
@@ -1416,6 +1480,8 @@ computeCC();
 updateGroupBadges();
 populateToEmailDatalist();
 setGatesForStation($("station").value.trim());
+updateExclusiveUI();
+onToPrimaryChanged();
 </script>
 </body>
 </html>
