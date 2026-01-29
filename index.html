@@ -1390,20 +1390,23 @@ function build(){
     footer
   ].join("\n");
 
-  const type = "Corrective";
-  const dailyCols = [
-    station,
-    dtIncidentTxt,
-    dtReceivedTxt,
-    dtRepairTxt,
-    duration,
-    fgid,
-    issue,
-    status,
-    tech,
-    type,
-    actions
-  ];
+const type = "Corrective";
+
+const dailyCols = [
+  "FMD-005XX",   // Column A — fixed placeholder
+  station,
+  dtIncidentTxt,
+  dtReceivedTxt,
+  dtRepairTxt,
+  duration,
+  fgid,
+  issue,
+  status,
+  tech,
+  type,
+  actions
+];
+  
   const trailingBlanks = 12;
   for(let i=0;i<trailingBlanks;i++) dailyCols.push("");
   const dailyLine = dailyCols.join("\t");
