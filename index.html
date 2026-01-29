@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>FareGate Ops Composer (V1)</title>
+
+<style>
+:root{
+  --bg:#0b1220; --card:#121a2b; --text:#e8eefc; --muted:#9fb0d8;
+  --accent:#3b82f6; --ok:#17c964; --err:#f31260; --border:rgba(255,255,255,.08);
+}
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+  background:var(--bg); color:var(--text);
+}
+.wrap{max-width:1040px;margin:28px auto;padding:16px}
+.card{
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  box-shadow:0 10px 28px rgba(0,0,0,.35);
+  padding:16px;
+  margin-bottom:14px;
+}
+h1{margin:0 0 8px;font-size:20px}
+h2{margin:0 0 8px;font-size:16px}
+.sub{color:var(--muted);font-size:13px; margin:0 0 10px}
+label{display:block;font-size:12px;color:var(--muted);margin:10px 0 6px}
+input,textarea,select{
+  width:100%;
+  border-radius:12px;
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.03);
+  color:var(--text);
+  padding:10px 12px;
+}
+textarea{min-height:120px;resize:vertical}
+.row{display:grid;gap:12px}
+.row.two{grid-template-columns:1fr 1fr}
+.row.three{grid-template-columns:1fr 1fr 1fr}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+button{
+  border:1px solid var(--border);
+  background:rgba(255,255,255,.04);
+  color:var(--text);
+  padding:10px 12px;
+  border-radius:12px;
+  cursor:pointer;
+  font-weight:600;
+}
+button.primary{background:rgba(59,130,246,.18)}
+button.good{background:rgba(23,201,100,.18)}
+button.warn{background:rgba(243,18,96,.18)}
+.preview{
+  white-space:pre-wrap;
+  font-family:ui-monospace,Menlo,Consolas,monospace;
+  font-size:12px;
+  background:rgba(0,0,0,.25);
+  border:1px solid var(--border);
+  border-radius:12px;
+  padding:12px;
+  min-height:120px;
+}
+.status{margin-top:8px;font-size:13px}
+.ok{color:var(--ok)}
+.err{color:var(--err)}
+.small{font-size:12px;color:var(--muted)}
+</style>
+</head>
+
+<body>
+<div class="wrap">
+
+<div class="card">
+  <h1>FareGate Ops Composer (V1)</h1>
+  <p class="sub">Dispatch, Closure & Daily Report email generator</p>
+</div>
+
+<div class="card">
+  <h2>Ticket Fields</h2>
+
+  <div class="row two">
+    <div>
+      <label>Station Name</label>
+      <input id="station">
+    </div>
+    <div>
+      <label>Gate #</label>
+      <input id="fgid">
+    </div>
+  </div>
+
+  <div class="row two">
+    <div>
+      <label>Ticket ID</label>
+      <input id="ticketId" placeholder="12345">
+    </div>
+    <div>
+      <label>Technician</label>
+      <input id="tech">
+    </div>
+  </div>
+
+  <div class="row three">
+    <div>
+      <label>Incident Date/Time</label>
+      <input id="dtReported">
+    </div>
+    <div>
+      <label>Ticket Received</label>
+      <input id="dtDispatch">
+    </div>
+    <div>
+      <label>Repair Date/Time</label>
+      <input id="dtArrival">
+    </div>
+  </div>
+
+  <label>Issue</label>
+  <textarea id="issue"></textarea>
+
+  <label>Actions Taken</label>
+  <textarea id="actions"></textarea>
+
+  <div class="btns">
+    <button class="primary" id="build">Build Emails + Daily Line</button>
+  </div>
+</div>
+
+<div class="card">
+  <h2>Outputs</h2>
+
+  <label>Daily Report Line</label>
+  <div id="dailyPreview" class="preview"></div>
+  <div class="btns">
+    <button class="good" id="copyDaily">Copy Daily Line</button>
+  </div>
+
+  <div class="btns" style="margin-top:14px">
+    <button class="primary" id="openDailyReportEmail">
+      Generate Daily Report Email
+    </button>
+  </div>
+
+  <div id="actionStatus" class="status"></div>
+</div>
+
+</div>
+
+<script>
+const HELPDEK_NEXIEN_EMAIL = "helpdesknexien@nexien.com";
+
+const CC_GROUPS = {
+  metro: ["JacksonKA@metro.net","villanuevar@metro.net","AlmedaL@metro.net","NangleC@metro.net"],
+  straffic: [
+    "kihyun38@straffic.co.kr","jelee127@straffic.co.kr","twinsi@straffic.co.kr","jwyoo@straffic.co.kr",
+    "shsong@straffic.co.kr","yssong@straffic.co.kr","yosep.choi@straffic.com"
+  ]
+};
+
+function uniqueEmails(arr){
+  return [...new Set(arr.map(e => e.toLowerCase()))];
+}
+
+function gmailCompose(to, cc, subject, body){
+  const p = new URLSearchParams({
+    view:"cm", fs:"1", su:subject, body:body, authuser:"helpdesk@nexien.com"
+  });
+  if(to) p.set("to", to);
+  if(cc) p.set("cc", cc);
+  return "https://mail.google.com/mail/?" + p.toString();
+}
+
+function buildFooter(){
+  return [
+    "",
+    "Thank you,",
+    "Faregate Helpdesk",
+    "helpdesk@nexien.com",
+    "Online Service Request Form (Required) URL: http://bit.ly/474taFL",
+    "Phone: 1-866-703-9866"
+  ].join("\n");
+}
+
+document.getElementById("build").onclick = () => {
+  const station = station.value.trim();
+  const fgidVal = fgid.value.trim();
+  const issueTxt = issue.value.trim();
+  const techVal = tech.value.trim();
+  const actionsTxt = actions.value.trim();
+
+  const dailyCols = [
+    "FMD-005XX",
+    station,
+    dtReported.value,
+    dtDispatch.value,
+    dtArrival.value,
+    "",
+    fgidVal,
+    issueTxt,
+    "Closed",
+    techVal,
+    "Corrective",
+    actionsTxt
+  ];
+
+  while(dailyCols.length < 24) dailyCols.push("");
+  dailyPreview.textContent = dailyCols.join("\t");
+};
+
+copyDaily.onclick = () =>
+  navigator.clipboard.writeText(dailyPreview.textContent);
+
+document.getElementById("openDailyReportEmail").onclick = () => {
+  const d = new Date();
+  d.setDate(d.getDate() - 1);
+  const mm = String(d.getMonth()+1).padStart(2,"0");
+  const dd = String(d.getDate()).padStart(2,"0");
+  const yy = String(d.getFullYear()).slice(-2);
+  const tag = `${mm}-${dd}-${yy}`;
+
+  const subject = `Faregate Maintenance Daily Report - ${tag}`;
+  const body = [subject, buildFooter()].join("\n");
+
+  const to = CC_GROUPS.metro.join(", ");
+  const cc = uniqueEmails([...CC_GROUPS.straffic, HELPDEK_NEXIEN_EMAIL]).join(", ");
+
+  window.open(gmailCompose(to, cc, subject, body), "_blank");
+};
+</script>
+</body>
+</html>
