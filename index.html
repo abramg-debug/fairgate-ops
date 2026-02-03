@@ -388,9 +388,9 @@ input.etaMini{
 
       <div class="btns" style="margin-top:6px; align-items:center">
         <button type="button" class="primary" id="etaNow">Now</button>
-        <button type="button" class="primary" id="eta15">+ 15</button>
         <button type="button" class="primary" id="eta30">+ 30</button>
         <button type="button" class="primary" id="eta45">+ 45</button>
+        <button type="button" class="primary" id="eta60">+ 60</button>
         <button type="button" class="primary" id="eta90">+ 90</button>
 
         <!-- small inline custom minutes box -->
@@ -1623,9 +1623,9 @@ $("nowRepair").onclick = () => { $("dtArrival").value = nowStamp(); };
 
 /* ✅ UPDATED: ETA button wiring (no Set button) */
 $("etaNow").onclick = () => setEtaMinutes(0);
-$("eta15").onclick  = () => setEtaMinutes(15);
 $("eta30").onclick  = () => setEtaMinutes(30);
 $("eta45").onclick  = () => setEtaMinutes(45);
+$("eta60").onclick  = () => setEtaMinutes(60);
 $("eta90").onclick  = () => setEtaMinutes(90);
 
 /* auto-apply when typing custom minutes (and Enter key convenience) */
