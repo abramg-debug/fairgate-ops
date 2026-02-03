@@ -193,6 +193,12 @@ details.ccDetails > summary::-webkit-details-marker{display:none}
 .disabledGroup > summary{
   cursor: not-allowed !important;
 }
+
+/* ✅ NEW: compact ETA custom minutes input (inline after +90) */
+input.etaMini{
+  width:92px;
+  padding:10px 10px;
+}
 </style>
 </head>
 
@@ -377,24 +383,18 @@ details.ccDetails > summary::-webkit-details-marker{display:none}
       <label>Cause (if known)</label>
       <input id="cause" placeholder="Optional">
 
-      <!-- ✅ NEW: ETA selector (Dispatch-only) -->
+      <!-- ✅ UPDATED: compact ETA selector (no Set button) -->
       <label style="margin-top:12px">ETA (minutes)</label>
 
-      <div class="btns" style="margin-top:6px">
+      <div class="btns" style="margin-top:6px; align-items:center">
         <button type="button" class="primary" id="etaNow">Now</button>
         <button type="button" class="primary" id="eta15">+ 15</button>
         <button type="button" class="primary" id="eta30">+ 30</button>
         <button type="button" class="primary" id="eta45">+ 45</button>
         <button type="button" class="primary" id="eta90">+ 90</button>
-      </div>
 
-      <div class="row two" style="margin-top:8px">
-        <div>
-          <input id="etaCustom" placeholder="Custom minutes (e.g., 20)">
-        </div>
-        <div>
-          <button type="button" class="primary" id="etaSetCustom" style="width:100%">Set</button>
-        </div>
+        <!-- small inline custom minutes box -->
+        <input id="etaCustom" class="etaMini" inputmode="numeric" placeholder="Custom">
       </div>
 
       <div class="small" style="margin-top:6px">
@@ -1369,7 +1369,7 @@ function buildAllRecipientsString(){
   return list.join(", ");
 }
 
-/* ✅ NEW: ETA helpers (Dispatch-only) */
+/* ✅ ETA helpers (Dispatch-only) */
 function getEtaMinutes(){
   const raw = ($("etaCustom").value || "").trim();
   if(!raw) return null;
@@ -1472,7 +1472,7 @@ function build(){
 
   const dispSub = `Service Report - "${station || "Station Name"}" – ${fgid || "FG ID"} – ${ticket || "Ticket ID"}`;
 
-  /* ✅ NEW: Dispatch-only ETA line (omit if blank) */
+  /* ✅ Dispatch-only ETA line (omit if blank) */
   const etaMin = getEtaMinutes();
   const etaLine = (etaMin == null)
     ? ""
@@ -1621,21 +1621,33 @@ $("nowIncident").onclick = () => { $("dtReported").value = nowStamp(); };
 $("nowReceived").onclick = () => { $("dtDispatch").value = nowStamp(); };
 $("nowRepair").onclick = () => { $("dtArrival").value = nowStamp(); };
 
-/* ✅ NEW: ETA button wiring */
+/* ✅ UPDATED: ETA button wiring (no Set button) */
 $("etaNow").onclick = () => setEtaMinutes(0);
 $("eta15").onclick  = () => setEtaMinutes(15);
 $("eta30").onclick  = () => setEtaMinutes(30);
 $("eta45").onclick  = () => setEtaMinutes(45);
 $("eta90").onclick  = () => setEtaMinutes(90);
-$("etaSetCustom").onclick = () => {
-  const n = getEtaMinutes();
-  if(n == null){
-    setStatus("buildStatus", "Enter a valid ETA minutes (0 or more).", "err");
-    return;
+
+/* auto-apply when typing custom minutes (and Enter key convenience) */
+$("etaCustom").addEventListener("input", () => {
+  const v = ($("etaCustom").value || "").trim();
+  if(!v) return; // allow blank
+  // keep only digits (user can paste "20 min" etc.)
+  const digits = v.replace(/[^\d]/g, "");
+  if(digits !== v) $("etaCustom").value = digits;
+});
+$("etaCustom").addEventListener("keydown", (e) => {
+  if(e.key === "Enter"){
+    e.preventDefault();
+    const n = getEtaMinutes();
+    if(n == null){
+      setStatus("buildStatus", "Enter a valid ETA minutes (0 or more).", "err");
+      return;
+    }
+    setEtaMinutes(n);
+    setStatus("buildStatus", "ETA set.", "ok");
   }
-  setEtaMinutes(n);
-  setStatus("buildStatus", "ETA set.", "ok");
-};
+});
 
 $("savePrefs").onclick = savePrefs;
 $("loadPrefs").onclick = () => { loadPrefs(); setStatus("prefStatus", "Reloaded.", "ok"); };
