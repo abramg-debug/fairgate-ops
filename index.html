@@ -1479,7 +1479,7 @@ function build(){
     `CAUSE (IF KNOWN): ${cause}`
   ];
   if(etaLine) dispBodyLines.push(etaLine);
-    `TECHNICIAN: ${tech}`,
+  
   const dispBody = dispBodyLines.concat([footer]).join("\n");
 
   const closeSub = `Service Report - "${station || "Station Name"}" – ${fgid || "FG ID"} – ${ticket || "Ticket ID"}`;
