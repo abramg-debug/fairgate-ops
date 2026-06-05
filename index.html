@@ -449,219 +449,321 @@ const SMARTSHEET_FORM_URL = "https://app.smartsheet.com/b/form/12e1a48ab3ea494ba
  * Format: Line,Site ID,Site Name,Gate #
  */
 const SITE_DATA_CSV = `
-Line,Site ID,Site Name,Gate #
-A,73,Sierra Madre Villa,00500
-A,73,Sierra Madre Villa,00501
-A,73,Sierra Madre Villa,00502
-A,73,Sierra Madre Villa,00503
-A,73,Sierra Madre Villa,00536
-A,144,Firestone,00605
-A,144,Firestone,00606
-A,144,Firestone,00608
-A,144,Firestone,00609
-A,145,Willowbrook - Rosa Parks,00333
-A,145,Willowbrook - Rosa Parks,00334
-A,145,Willowbrook - Rosa Parks,00335
-A,145,Willowbrook - Rosa Parks,00337
-A,145,Willowbrook - Rosa Parks,00340
-A,145,Willowbrook - Rosa Parks,00342
-A,145,Willowbrook - Rosa Parks,00343
-A,145,Willowbrook - Rosa Parks,00345
-A,145,Willowbrook - Rosa Parks,00346
-A,145,Willowbrook - Rosa Parks,00349
-A,145,Willowbrook - Rosa Parks,00350
-A,145,Willowbrook - Rosa Parks,00351
-A,145,Willowbrook - Rosa Parks,00353
-A,145,Willowbrook - Rosa Parks,00357
-A,145,Willowbrook - Rosa Parks,00358
-A,145,Willowbrook - Rosa Parks,00450
-A,145,Willowbrook - Rosa Parks,00451
-A,145,Willowbrook - Rosa Parks,00452
-A,145,Willowbrook - Rosa Parks,00453
-A,145,Willowbrook - Rosa Parks,00454
-A,145,Willowbrook - Rosa Parks,00455
-A,145,Willowbrook - Rosa Parks,00456
-A,145,Willowbrook - Rosa Parks,00458
-A,145,Willowbrook - Rosa Parks,00459
-A,145,Willowbrook - Rosa Parks,00460
-A,167,Lake,00508
-A,167,Lake,00510
-A,168,Allen,00505
-A,168,Allen,00506
-A,168,Allen,00507
-A,2975,Glendora,00462
-A,2975,Glendora,00463
-A,2975,Glendora,00466
-A,2975,Glendora,00467
-A,2976,San Dimas,00470
-A,2976,San Dimas,00471
-A,2977,La Verne,00478
-A,2977,La Verne,00479
-A,2977,La Verne,00482
-A,2977,La Verne,00483
-A,2978,Pomona,00486
-A,2978,Pomona,00487
-A,2978,Pomona,00488
-A,2978,Pomona,00489
-A,2978,Pomona,00490
-A,2978,Pomona,00493
-A,2978,Pomona,00494
-A,2978,Pomona,00497
-A,2978,Pomona,00498
-B,104,Westlake/MacArthur Park,00901
-B,104,Westlake/MacArthur Park,00902
-B,104,Westlake/MacArthur Park,00903
-B,104,Westlake/MacArthur Park,00904
-B,104,Westlake/MacArthur Park,00905
-B,104,Westlake/MacArthur Park,00906
-B,104,Westlake/MacArthur Park,00907
-B,104,Westlake/MacArthur Park,00908
-B,104,Westlake/MacArthur Park,00909
-B,104,Westlake/MacArthur Park,00910
-B,120,North Hollywood,00154
-B,120,North Hollywood,00155
-B,120,North Hollywood,00156
-B,120,North Hollywood,00157
-B,120,North Hollywood,00158
-B,120,North Hollywood,00161
-B,120,North Hollywood,00162
-B,120,North Hollywood,00163
-B,120,North Hollywood,00164
-B,120,North Hollywood,00165
-B,120,North Hollywood,00166
-B,123,Pershing Square,00035
-B,123,Pershing Square,00036
-B,123,Pershing Square,00037
-B,123,Pershing Square,00038
-B,123,Pershing Square,00039
-B,123,Pershing Square,00040
-B,123,Pershing Square,00041
-B,123,Pershing Square,00043
-B,123,Pershing Square,00044
-B,123,Pershing Square,00045
-B,123,Pershing Square,00046
-B,123,Pershing Square,00047
-B,124,7th Street/Metro Center,00049
-B,124,7th Street/Metro Center,00050
-B,124,7th Street/Metro Center,00051
-B,124,7th Street/Metro Center,00052
-B,124,7th Street/Metro Center,00054
-B,124,7th Street/Metro Center,00055
-B,124,7th Street/Metro Center,00056
-B,124,7th Street/Metro Center,00057
-B,124,7th Street/Metro Center,00059
-B,124,7th Street/Metro Center,00060
-B,124,7th Street/Metro Center,00061
-B,124,7th Street/Metro Center,00062
-B,124,7th Street/Metro Center,00064
-B,124,7th Street/Metro Center,00065
-B,124,7th Street/Metro Center,00066
-B,124,7th Street/Metro Center,00067
-B,124,7th Street/Metro Center,00069
-B,124,7th Street/Metro Center,00070
-B,124,7th Street/Metro Center,00071
-B,125,Wilshire/Vermont,00087
-B,125,Wilshire/Vermont,00088
-B,125,Wilshire/Vermont,00089
-B,125,Wilshire/Vermont,00090
-B,125,Wilshire/Vermont,00091
-B,125,Wilshire/Vermont,00095
-B,125,Wilshire/Vermont,00096
-B,129,Vermont/Santa Monica,00104
-B,129,Vermont/Santa Monica,00105
-B,129,Vermont/Santa Monica,00106
-B,129,Vermont/Santa Monica,00107
-B,129,Vermont/Santa Monica,00110
-B,129,Vermont/Santa Monica,00111
-B,129,Vermont/Santa Monica,00112
-B,131,Hollywood/Western,00124
-B,131,Hollywood/Western,00125
-B,131,Hollywood/Western,00126
-B,131,Hollywood/Western,00127
-B,131,Hollywood/Western,00128
-B,122,Civic Center,00026
-B,122,Civic Center,00027
-B,122,Civic Center,00028
-B,122,Civic Center,00029
-B,122,Civic Center,00030
-B,122,Civic Center,00031
-B,122,Civic Center,00032
-B,122,Civic Center,00911
-B,122,Civic Center,00912
-B,122,Civic Center,00913
-K,2941,LAX/MTC,00206
-K,2941,LAX/MTC,00207
-K,2941,LAX/MTC,00208
-K,2941,LAX/MTC,00209
-K,2941,LAX/MTC,00210
-K,2941,LAX/MTC,00211
-K,2941,LAX/MTC,00213
-K,2941,LAX/MTC,00214
-K,2941,LAX/MTC,00215
-K,2941,LAX/MTC,00216
-K,2941,LAX/MTC,00217
-K,2941,LAX/MTC,00218
-K,171,Douglas,00436
-K,171,Douglas,00437
-K,171,Douglas,00438
-K,171,Douglas,00439
-K,171,Douglas,00530
-K,171,Douglas,00531
-K,171,Douglas,00440
-K,171,Douglas,00441
-K,171,Douglas,00442
-K,171,Douglas,00475
-K,171,Douglas,00476
-C,174,Aviation/Imperial,00411
-C,174,Aviation/Imperial,00412
-C,174,Aviation/Imperial,00413
-C,174,Aviation/Imperial,00415
-C,174,Aviation/Imperial,00416
-C,174,Aviation/Imperial,00417
-C,174,Aviation/Imperial,00472
-C,174,Aviation/Imperial,00474
-C,60,Norwalk,00307
-C,60,Norwalk,00308
-C,60,Norwalk,00532
-C,60,Norwalk,00533
-C,60,Norwalk,00534
-C,60,Norwalk,00535
-C,60,Norwalk,00300
-C,60,Norwalk,00301
-C,60,Norwalk,00302
-C,60,Norwalk,00303
-C,60,Norwalk,00304
-C,60,Norwalk,00305
-D,126,Wilshire/Normandie,00169
-D,126,Wilshire/Normandie,00170
-D,126,Wilshire/Normandie,00171
-D,126,Wilshire/Normandie,00172
-D,126,Wilshire/Normandie,00173
-D,126,Wilshire/Normandie,00950
-D,126,Wilshire/Normandie,00951
-D,2986,Wilshire/La Brea,00184
-D,2986,Wilshire/La Brea,00185
-D,2986,Wilshire/La Brea,00186
-D,2986,Wilshire/La Brea,00187
-D,2987,Wilshire/Fairfax,00190
-D,2987,Wilshire/Fairfax,00191
-D,2987,Wilshire/Fairfax,00192
-D,2987,Wilshire/Fairfax,00193
-D,2988,Wilshire/La Cienega,00916
-D,2988,Wilshire/La Cienega,00917
-D,2988,Wilshire/La Cienega,00918
-D,2988,Wilshire/La Cienega,00919
-D,2988,Wilshire/La Cienega,00920
-D,2988,Wilshire/La Cienega,00921
-D,2988,Wilshire/La Cienega,00922
-D,127,Wilshire/Western,930
-D,127,Wilshire/Western,931
-D,127,Wilshire/Western,932
-D,127,Wilshire/Western,933
-D,127,Wilshire/Western,934
-D,127,Wilshire/Western,935
-D,127,Wilshire/Western,936
-
+Line,Site ID,Site Name,FG #,Station Entrance,Type
+C,60,Norwalk,SAG00300,East,ADA
+C,60,Norwalk,RVG00301,East,Standard
+C,60,Norwalk,RVG00302,East,Standard
+C,60,Norwalk,RVG00303,East,Standard
+C,60,Norwalk,SAG00304,East,ADA
+C,60,Norwalk,SAG00305,East,ADA
+C,60,Norwalk,ECX00306,East,Dummy
+C,60,Norwalk,SAG00307,West,ADA
+C,60,Norwalk,RVG00308,West,Standard
+C,60,Norwalk,RVG00532,West,Standard
+C,60,Norwalk,SAG00533,West,ADA
+C,60,Norwalk,SAG00534,West,ADA
+C,60,Norwalk,ECX00535,West,Dummy
+C,60,Norwalk,N/A,,N/A
+C,60,Norwalk,ESG,,N/A
+A,73,Sierra Madre Villa,RVG00500,Main,Standard
+A,73,Sierra Madre Villa,RVG00501,Main,Standard
+A,73,Sierra Madre Villa,RVG00502,Main,Standard
+A,73,Sierra Madre Villa,SAG00503,Main,ADA
+A,73,Sierra Madre Villa,ECX00504,Main,Dummy
+A,73,Sierra Madre Villa,SAG00536,Main,ADA
+A,73,Sierra Madre Villa,N/A,,N/A
+A,73,Sierra Madre Villa,ESG,,N/A
+B,104,Westlake/MacArthur Park,ECX00900,South,Dummy
+B,104,Westlake/MacArthur Park,RVG00901,South,Standard
+B,104,Westlake/MacArthur Park,RVG00902,South,Standard
+B,104,Westlake/MacArthur Park,RVG00903,South,Standard
+B,104,Westlake/MacArthur Park,SAG00904,South,ADA
+B,104,Westlake/MacArthur Park,SAG00905,South,ADA
+B,104,Westlake/MacArthur Park,SAG00906,South,ADA
+B,104,Westlake/MacArthur Park,RVG00907,South,Standard
+B,104,Westlake/MacArthur Park,RVG00908,South,Standard
+B,104,Westlake/MacArthur Park,RVG00909,South,Standard
+B,104,Westlake/MacArthur Park,RVG00910,South,Standard
+B,104,Westlake/MacArthur Park,N/A,,N/A
+B,104,Westlake/MacArthur Park,ESG,,N/A
+B,120,North Hollywood,RVG00154,West,Standard
+B,120,North Hollywood,RVG00155,West,Standard
+B,120,North Hollywood,RVG00156,West,Standard
+B,120,North Hollywood,RVG00157,West,Standard
+B,120,North Hollywood,SAG00158,West,ADA
+B,120,North Hollywood,ECX00159,West,Dummy
+B,120,North Hollywood,RVG00161,East,Standard
+B,120,North Hollywood,RVG00162,East,Standard
+B,120,North Hollywood,RVG00163,East,Standard
+B,120,North Hollywood,RVG00164,East,Standard
+B,120,North Hollywood,RVG00165,East,Standard
+B,120,North Hollywood,SAG00166,East,ADA
+B,120,North Hollywood,ECX00167,East,Dummy
+B,120,North Hollywood,N/A,,N/A
+B,120,North Hollywood,ESG,,N/A
+B,122,Civic Center,RVG00026,North,Standard
+B,122,Civic Center,RVG00027,North,Standard
+B,122,Civic Center,SAG00028,North,ADA
+B,122,Civic Center,SAG00029,North,ADA
+B,122,Civic Center,SAG00030,North,ADA
+B,122,Civic Center,RVG00031,North,Standard
+B,122,Civic Center,RVG00032,North,Standard
+B,122,Civic Center,ECX00033,North,Dummy
+B,122,Civic Center,RVG00911,South,Standard
+B,122,Civic Center,RVG00912,South,Standard
+B,122,Civic Center,SAG00913,South,ADA
+B,122,Civic Center,ECX00914,South,Dummy
+B,122,Civic Center,N/A,,N/A
+B,122,Civic Center,ESG,,N/A
+B,123,Pershing Square,RVG00035,South,Standard
+B,123,Pershing Square,RVG00036,South,Standard
+B,123,Pershing Square,RVG00037,South,Standard
+B,123,Pershing Square,RVG00038,South,Standard
+B,123,Pershing Square,RVG00039,South,Standard
+B,123,Pershing Square,RVG00040,South,Standard
+B,123,Pershing Square,SAG00041,South,ADA
+B,123,Pershing Square,ECX00042,South,Dummy
+B,123,Pershing Square,RVG00043,North,Standard
+B,123,Pershing Square,RVG00044,North,Standard
+B,123,Pershing Square,RVG00045,North,Standard
+B,123,Pershing Square,RVG00046,North,Standard
+B,123,Pershing Square,RVG00047,North,Standard
+B,123,Pershing Square,ECX00048,North,Dummy
+B,123,Pershing Square,N/A,,N/A
+B,123,Pershing Square,ESG,,N/A
+B,124,7th Street/Metro Center,RVG00049,Figueroa,Standard
+B,124,7th Street/Metro Center,RVG00050,Figueroa,Standard
+B,124,7th Street/Metro Center,RVG00051,Figueroa,Standard
+B,124,7th Street/Metro Center,SAG00052,Figueroa,ADA
+B,124,7th Street/Metro Center,ECX00053,Figueroa,Dummy
+B,124,7th Street/Metro Center,RVG00054,Figueroa,Standard
+B,124,7th Street/Metro Center,RVG00055,Figueroa,Standard
+B,124,7th Street/Metro Center,RVG00056,Figueroa,Standard
+B,124,7th Street/Metro Center,RVG00057,Figueroa,Standard
+B,124,7th Street/Metro Center,ECX00058,Figueroa,Dummy
+B,124,7th Street/Metro Center,RVG00059,Hope,Standard
+B,124,7th Street/Metro Center,RVG00060,Hope,Standard
+B,124,7th Street/Metro Center,RVG00061,Hope,Standard
+B,124,7th Street/Metro Center,SAG00062,Hope,ADA
+B,124,7th Street/Metro Center,ECX00063,Hope,Dummy
+B,124,7th Street/Metro Center,RVG00064,Hope,Standard
+B,124,7th Street/Metro Center,RVG00065,Hope,Standard
+B,124,7th Street/Metro Center,RVG00066,Hope,Standard
+B,124,7th Street/Metro Center,RVG00067,Hope,Standard
+B,124,7th Street/Metro Center,ECX00068,Hope,Dummy
+B,124,7th Street/Metro Center,RVG00069,Flower,Standard
+B,124,7th Street/Metro Center,RVG00070,Flower,Standard
+B,124,7th Street/Metro Center,SAG00071,Flower,ADA
+B,124,7th Street/Metro Center,ECX00072,Flower,Dummy
+B,124,7th Street/Metro Center,N/A,,N/A
+B,124,7th Street/Metro Center,ESG,,N/A
+B,125,Wilshire/Vermont,RVG00087,Main,Standard
+B,125,Wilshire/Vermont,RVG00088,Main,Standard
+B,125,Wilshire/Vermont,RVG00089,Main,Standard
+B,125,Wilshire/Vermont,RVG00090,Main,Standard
+B,125,Wilshire/Vermont,RVG00091,Main,Standard
+B,125,Wilshire/Vermont,ECX00094,Main,Dummy
+B,125,Wilshire/Vermont,RVG00095,Elevator,Standard
+B,125,Wilshire/Vermont,SAG00096,Elevator,ADA
+B,125,Wilshire/Vermont,ECX00097,Elevator,Dummy
+B,125,Wilshire/Vermont,N/A,,N/A
+B,125,Wilshire/Vermont,ESG,,N/A
+D,126,Wilshire/Normandie,RVG00169,Main,Standard
+D,126,Wilshire/Normandie,RVG00170,Main,Standard
+D,126,Wilshire/Normandie,RVG00171,Main,Standard
+D,126,Wilshire/Normandie,RVG00172,Main,Standard
+D,126,Wilshire/Normandie,RVG00173,Main,Standard
+D,126,Wilshire/Normandie,ECX00174,Main,Dummy
+D,126,Wilshire/Normandie,SAG00950,Main,ADA
+D,126,Wilshire/Normandie,SAG00951,Main,ADA
+D,126,Wilshire/Normandie,N/A,,N/A
+D,126,Wilshire/Normandie,ESG,,N/A
+D,127,Wilshire/Western,RVG00930,Main,Standard
+D,127,Wilshire/Western,RVG00931,Main,Standard
+D,127,Wilshire/Western,RVG00932,Main,Standard
+D,127,Wilshire/Western,RVG00933,Main,Standard
+D,127,Wilshire/Western,SAG00934,Main,ADA
+D,127,Wilshire/Western,SAG00935,Main,ADA
+D,127,Wilshire/Western,SAG00936,Main,ADA
+D,127,Wilshire/Western,ECX00937,Main,Dummy
+D,127,Wilshire/Western,N/A,,N/A
+D,127,Wilshire/Western,ESG,,N/A
+B,129,Vermont/Santa Monica,RVG00104,North,Standard
+B,129,Vermont/Santa Monica,RVG00105,North,Standard
+B,129,Vermont/Santa Monica,RVG00106,North,Standard
+B,129,Vermont/Santa Monica,SAG00107,North,ADA
+B,129,Vermont/Santa Monica,ECX00108,North,Dummy
+B,129,Vermont/Santa Monica,RVG00110,South,Standard
+B,129,Vermont/Santa Monica,RVG00111,South,Standard
+B,129,Vermont/Santa Monica,SAG00112,South,ADA
+B,129,Vermont/Santa Monica,ECX00113,South,Dummy
+B,129,Vermont/Santa Monica,N/A,,ADA
+B,129,Vermont/Santa Monica,ESG,,N/A
+B,131,Hollywood/Western,RVG00124,Main,Standard
+B,131,Hollywood/Western,RVG00125,Main,Standard
+B,131,Hollywood/Western,RVG00126,Main,Standard
+B,131,Hollywood/Western,RVG00127,Main,Standard
+B,131,Hollywood/Western,SAG00128,Main,ADA
+B,131,Hollywood/Western,ECX00129,Main,Dummy
+B,131,Hollywood/Western,N/A,,N/A
+B,131,Hollywood/Western,ESG,,N/A
+A,144,Firestone,RVG00605,North,Standard
+A,144,Firestone,RVG00606,North,Standard
+A,144,Firestone,ECX00607,North,Dummy
+A,144,Firestone,RVG00608,South,Standard
+A,144,Firestone,SAG00609,South,ADA
+A,144,Firestone,ECX00610,South,Dummy
+A,144,Firestone,N/A,,N/A
+A,144,Firestone,ESG,,N/A
+A,145,Willowbrook/Rosa Parks,SAG00340,West,ADA
+A,145,Willowbrook/Rosa Parks,ECX00341,West,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00342,West,Standard
+A,145,Willowbrook/Rosa Parks,RVG00343,West,Standard
+A,145,Willowbrook/Rosa Parks,ECX00344,West,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00345,West,Standard
+A,145,Willowbrook/Rosa Parks,RVG00346,West,Standard
+A,145,Willowbrook/Rosa Parks,ECX00347,West,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00333,Center Plaza,Standard
+A,145,Willowbrook/Rosa Parks,RVG00334,Center Plaza,Standard
+A,145,Willowbrook/Rosa Parks,SAG00335,Center Plaza,ADA
+A,145,Willowbrook/Rosa Parks,ECX00336,Center Plaza,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00337,Center Plaza,Standard
+A,145,Willowbrook/Rosa Parks,SAG00460,Center Plaza,ADA
+A,145,Willowbrook/Rosa Parks,ECX00202,Center Plaza,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00349,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00350,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00351,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00453,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00454,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00455,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,RVG00456,Transfer Mezzanine - 1,Standard
+A,145,Willowbrook/Rosa Parks,ECX00359,Transfer Mezzanine - 1,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00357,Transfer Mezzanine - 2,Standard
+A,145,Willowbrook/Rosa Parks,RVG00358,Transfer Mezzanine - 2,Standard
+A,145,Willowbrook/Rosa Parks,SAG00451,Transfer Mezzanine - 2,ADA
+A,145,Willowbrook/Rosa Parks,ECX00356,Transfer Mezzanine - 2,Dummy
+A,145,Willowbrook/Rosa Parks,RVG00458,North-East,Standard
+A,145,Willowbrook/Rosa Parks,SAG00459,North-East,ADA
+A,145,Willowbrook/Rosa Parks,ECX00201,North-East,Dummy
+A,145,Willowbrook/Rosa Parks,SAG00353,Street Level Elev,ADA
+A,145,Willowbrook/Rosa Parks,ECX00354,Street Level Elev,Dummy
+A,145,Willowbrook/Rosa Parks,SAG00450,South,ADA
+A,145,Willowbrook/Rosa Parks,RVG00452,South,Standard
+A,145,Willowbrook/Rosa Parks,ECX00200,South,Dummy
+A,145,Willowbrook/Rosa Parks,N/A,,N/A
+A,145,Willowbrook/Rosa Parks,ESG,,N/A
+A,167,Lake,RVG00508,Main,Standard
+A,167,Lake,ECX00509,Main,Dummy
+A,167,Lake,SAG00510,Main,ADA
+A,167,Lake,ECX00511,Main,Dummy
+A,167,Lake,N/A,,N/A
+A,167,Lake,ESG,,N/A
+A,168,Allen,RVG00505,North East,Standard
+A,168,Allen,SAG00506,North East,ADA
+A,168,Allen,SAG00507,North East,ADA
+A,168,Allen,ECX00915,North East,Dummy
+A,168,Allen,N/A,,N/A
+A,168,Allen,ESG,,N/A
+K,171,Douglas,RVG00436,North,Standard
+K,171,Douglas,RVG00437,North,Standard
+K,171,Douglas,SAG00438,North,ADA
+K,171,Douglas,ECX00439,North,Dummy
+K,171,Douglas,RVG00440,South,Standard
+K,171,Douglas,RVG00441,South,Standard
+K,171,Douglas,SAG00442,South,ADA
+K,171,Douglas,SAG00475,South,ADA
+K,171,Douglas,SAG00530,South,ADA
+K,171,Douglas,ECX00531,South,Dummy
+K,171,Douglas,N/A,,N/A
+K,171,Douglas,ESG,,N/A
+C,174,Aviation/Imperial,RVG00411,East,Standard
+C,174,Aviation/Imperial,RVG00412,East,Standard
+C,174,Aviation/Imperial,SAG00413,East,ADA
+C,174,Aviation/Imperial,ECX00414,East,Dummy
+C,174,Aviation/Imperial,RVG00415,West,Standard
+C,174,Aviation/Imperial,RVG00416,West,Standard
+C,174,Aviation/Imperial,SAG00417,West,ADA
+C,174,Aviation/Imperial,ECX00418,West,Dummy
+C,174,Aviation/Imperial,SAG00472,Center,ADA
+C,174,Aviation/Imperial,ECX00473,Center,Dummy
+C,174,Aviation/Imperial,SAG00538,Center,ADA
+C,174,Aviation/Imperial,ECX00539,Center,Dummy
+C,174,Aviation/Imperial,N/A,,N/A
+C,174,Aviation/Imperial,ESG,,N/A
+A,2975,Glendora,ECX00461,West,Dummy
+A,2975,Glendora,SAG00462,West,ADA
+A,2975,Glendora,SAG00463,West,ADA
+A,2975,Glendora,ECX00465,East,Dummy
+A,2975,Glendora,SAG00466,East,ADA
+A,2975,Glendora,SAG00467,East,ADA
+A,2975,Glendora,N/A,,N/A
+A,2975,Glendora,ESG,,N/A
+A,2976,San Dimas,ECX00469,West,Dummy
+A,2976,San Dimas,SAG00470,West,ADA
+A,2976,San Dimas,SAG00471,West,ADA
+A,2976,San Dimas,N/A,,N/A
+A,2976,San Dimas,ESG,,N/A
+A,2977,La Verne,ECX00477,West,Dummy
+A,2977,La Verne,SAG00478,West,ADA
+A,2977,La Verne,SAG00479,West,ADA
+A,2977,La Verne,ECX00481,East,Dummy
+A,2977,La Verne,SAG00482,East,ADA
+A,2977,La Verne,SAG00483,East,ADA
+A,2977,La Verne,N/A,,N/A
+A,2977,La Verne,ESG,,N/A
+A,2978,Pomona,ECX00485,West,Dummy
+A,2978,Pomona,SAG00486,West,ADA
+A,2978,Pomona,SAG00487,West,ADA
+A,2978,Pomona,RVG00488,West,Standard
+A,2978,Pomona,RVG00489,West,Standard
+A,2978,Pomona,RVG00490,West,Standard
+A,2978,Pomona,ECX00492,East - West,Dummy
+A,2978,Pomona,SAG00493,East - West,ADA
+A,2978,Pomona,SAG00494,East - West,ADA
+A,2978,Pomona,ECX00496,East - East,Dummy
+A,2978,Pomona,SAG00497,East - East,ADA
+A,2978,Pomona,SAG00498,East - East,ADA
+A,2978,Pomona,N/A,,N/A
+A,2978,Pomona,ESG,,N/A
+D,2986,Wilshire/La Brea,RVG00184,Main,Standard
+D,2986,Wilshire/La Brea,RVG00185,Main,Standard
+D,2986,Wilshire/La Brea,RVG00186,Main,Standard
+D,2986,Wilshire/La Brea,SAG00187,Main,ADA
+D,2986,Wilshire/La Brea,ECX00188,Main,Dummy
+D,2986,Wilshire/La Brea,N/A,,N/A
+D,2986,Wilshire/La Brea,ESG,,N/A
+D,2987,Wilshire/Fairfax,RVG00190,Main,Standard
+D,2987,Wilshire/Fairfax,RVG00191,Main,Standard
+D,2987,Wilshire/Fairfax,RVG00192,Main,Standard
+D,2987,Wilshire/Fairfax,SAG00193,Main,ADA
+D,2987,Wilshire/Fairfax,ECX00194,Main,Dummy
+D,2987,Wilshire/Fairfax,N/A,,N/A
+D,2987,Wilshire/Fairfax,ESG,,N/A
+D,2988,Wilshire/La Cienega,RVG00916,Main,Standard
+D,2988,Wilshire/La Cienega,RVG00917,Main,Standard
+D,2988,Wilshire/La Cienega,RVG00918,Main,Standard
+D,2988,Wilshire/La Cienega,RVG00919,Main,Standard
+D,2988,Wilshire/La Cienega,RVG00920,Main,Standard
+D,2988,Wilshire/La Cienega,RVG00921,Main,Standard
+D,2988,Wilshire/La Cienega,SAG00922,Main,ADA
+D,2988,Wilshire/La Cienega,ECX00923,Main,Dummy
+D,2988,Wilshire/La Cienega,N/A,,N/A
+K,2941,LAX/MTC,ECX00205,South,Dummy
+K,2941,LAX/MTC,SAG00206,South,ADA
+K,2941,LAX/MTC,SAG00207,South,ADA
+K,2941,LAX/MTC,SAG00208,South,ADA
+K,2941,LAX/MTC,SAG00209,South,ADA
+K,2941,LAX/MTC,SAG00210,South,ADA
+K,2941,LAX/MTC,SAG00211,South,ADA
+K,2941,LAX/MTC,ECX00212,North,Dummy
+K,2941,LAX/MTC,SAG00213,North,ADA
+K,2941,LAX/MTC,SAG00214,North,ADA
+K,2941,LAX/MTC,SAG00215,North,ADA
+K,2941,LAX/MTC,SAG00216,North,ADA
+K,2941,LAX/MTC,SAG00217,North,ADA
+K,2941,LAX/MTC,SAG00218,North,ADA
+K,2941,LAX/MTC,N/A,,N/A
+K,2941,LAX/MTC,ESG,North,N/A
 `.trim();
 
 // CC groups (defaults)
@@ -1324,10 +1426,7 @@ async function copyText(txt){
 }
 
 function normalizeGateNumber(val){
-  const t = (val || "").trim();
-  if(!t) return "";
-  if(/^\d+$/.test(t)) return String(Number(t));
-  return t;
+  return (val || "").trim();
 }
 
 function nowStamp(){
@@ -1383,7 +1482,7 @@ function parseSites(){
   for(const row of lines){
     const parts = row.split(",").map(x => x.trim());
     if(parts.length < 4) continue;
-    const [line, siteId, station, gate] = parts;
+    const [line, siteId, station, gate, entrance, type] = parts;
 
     if(!stationIndex.has(station)){
       stationIndex.set(station, { line, siteId, gates: [] });
