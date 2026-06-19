@@ -1650,19 +1650,28 @@ function build(){
       "kihyun38@straffic.co.kr"
     ].join(", ");
 
-    const cubicBody = [
+    const cubicBodyLines = [
       "Hello, upon inspection, we found that",
       "",
       issue,
       "",
       "Please send a Tech to correct this issue.",
       "",
-      `TICKET ID: ${ticket}`,
       `STATION NAME: ${station}`,
       `FAREGATE ID: ${fgid}`,
-      `CAUSE (IF KNOWN): ${cause}`,
+      `CAUSE (IF KNOWN): ${cause}`
+    ];
+
+    if(dtIncidentTxt){
+      cubicBodyLines.push(`INCIDENT DATE/TIME: ${dtIncidentTxt}`);
+    }
+
+    cubicBodyLines.push(
+      `TICKET ID: ${ticket}`,
       footer
-    ].join("\n");
+    );
+
+    const cubicBody = cubicBodyLines.join("\n");
 
     window.open(
       gmailCompose(
